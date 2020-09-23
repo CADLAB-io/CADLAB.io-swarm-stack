@@ -1,0 +1,13 @@
+{
+    "cadlab_host_name": "cadlab.local",
+    "automatic_backups" : "daily",
+    "smtp": {
+        "server": "internal"
+    },
+    "ssl_tls_support": {
+        "enabled": true,
+        "vendor": "external",
+        "custom_ca_key": "cadlab.local.ca.key",
+        "custom_ca_pem": "cadlab.local.ca.pem"
+    }
+}
