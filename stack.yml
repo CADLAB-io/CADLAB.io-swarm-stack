@@ -14,7 +14,7 @@ services:
       mode: global
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/cadlab
+    image: docker.cadlab.io/cadlab:latest
     networks:
       cadlab_net: {}
     secrets:
@@ -44,7 +44,7 @@ services:
     container_name: mail-server
     deploy:
       mode: global
-    image: docker.cadlab.io/mail-server
+    image: docker.cadlab.io/mail-server:latest
     networks:
       cadlab_net: {}
     volumes:
@@ -58,7 +58,7 @@ services:
       MYSQL_PASSWORD_FILE: /run/secrets/mysql_db_pass
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
       MYSQL_USER: cadlab
-    image: docker.cadlab.io/mysql
+    image: docker.cadlab.io/mysql:latest
     networks:
       cadlab_net: {}
     secrets:
@@ -72,7 +72,7 @@ services:
       mode: global
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/nginx
+    image: docker.cadlab.io/nginx:latest
     networks:
       cadlab_net: {}
     ports:
