@@ -31,7 +31,7 @@ services:
     container_name: git-server
     deploy:
       mode: global
-    image: docker.cadlab.io/git-server
+    image: docker.cadlab.io/git-server:13.3.6-1
     networks:
       cadlab_net: {}
     volumes:
