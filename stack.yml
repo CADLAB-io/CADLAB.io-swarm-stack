@@ -22,7 +22,7 @@ services:
     volumes:
     - ./configs:/etc/cadlab:rw
     - certs:/etc/ssl/cadlab:rw
-    - ./backups/cadlab:/var/backups:rw
+    - ./backups:/var/backups:rw
     - git-backups:/var/git-backups:rw
     - git-configs:/var/git-configs:rw
     - /var/run/docker.sock:/var/run/docker.sock:rw
