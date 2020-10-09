@@ -1,5 +1,5 @@
 {
-    "cadlab_host_name": "cadlab.local",
+    "hostname": "cadlab.local",
     "automatic_backups" : "daily",
     "smtp": {
         "server": "internal"
