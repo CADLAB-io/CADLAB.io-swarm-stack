@@ -38,7 +38,7 @@ Install the latest release of Docker following the official [instructions](https
 
 Run the following command to make sure Docker was installed correctly:  
 
-```
+```bash
 docker version
 ```
 
@@ -49,7 +49,7 @@ The output of this command should be somewhat like this:
 
 In order to pull images from CADLAB Docker registry you need to login using your Docker client and credentials you obtain with a Self-Hosted CADLAB.io. Run the following command in the terminal:
 
-```
+```bash
 docker login docker.cadlab.io
 ```
 
@@ -83,13 +83,13 @@ Clone this repository to your server or download the latest release from the [re
 
 Place the files in the `/var/cadlab` or another directory of your choice.
 
-```
+```bash
 git clone https://github.com/CADLAB-io/docker-swarm-stack.git /var/cadlab
 ```
 
 Use the `master` branch to run CADLAB as a stand-alone application or checkout to `GitLab-backend`, if you'd like to integrate CADLAB with your self-hosted GitLab server.
 
-```
+```bash
 cd /var/cadlab
 git checkout GitLab-backend
 ```
@@ -98,7 +98,7 @@ git checkout GitLab-backend
 
 For better stability and security this installation should be run in a Docker swarm. To activate swarm mode run the following command:
 
-```
+```bash
 docker swarm init
 ```
 
@@ -110,7 +110,7 @@ Docker swarm provides a secure mechanism for managing secrets, e.g. passwords or
 
 Create a text file with your password using vim or nano editor. Here is an example of how to do it with vim:
 
-```
+```bash
 cd /var/cadlab
 vi mysql_password.txt
 ```
@@ -118,14 +118,14 @@ Then type your password and save the file, press `Esc`, type `:wq`, and press `e
 
 Now we can create our Docker secret and delete the file with the password: 
 
-```
+```bash
 docker secret create mysql_root_password mysql_password.txt
 rm mysql_password.txt
 ```
 
 You can also create a secret without creating the text file by executing the following line:
 
-```
+```bash
 echo "your_secure_password" | docker secret create mysql_root_password -
 ```
 
@@ -133,13 +133,13 @@ But after that we recommend cleaning up your history, to make sure you password 
 
 To delete your command from the history first run:
 
-```
+```bash
 history
 ```
 
 Locate your password creation password in the list and use its line number to delete it from the history:
 
-```
+```bash
 history -d <N>
 ```
 
@@ -147,7 +147,7 @@ history -d <N>
 
 In order to config CADLAB you need to edit cadlab.json file, located in the configs directory. The settings file is in the JSON format and the very minimum you need to specify is a hostname:
 
-```
+```javascript
 {
     "hostname": "cadlab.example.com"
 }
@@ -172,7 +172,7 @@ Backups are stored in the backups directory located in the swarm project. CADLAB
 #### ssl_tls_support
 This settings controls if your CADLAB instance is going to be available over HTTP or HTTPS. By default HTTPS is disabled. `ssl_tls_support` is an object of the following structure:
 
-```
+```javascript
 {
     ...
     "ssl_tls_support": {
@@ -183,12 +183,65 @@ This settings controls if your CADLAB instance is going to be available over HTT
 }
 ```
 
-Below is the list of all object properties with available values.
+Below is the list of all object properties with available values:
 - **enabled** - true/false enables HTTPS
 - **vendor** - specifies what certificates to use. Possible values are
   - *letsencrypt* - CADLAB will automatically generate free Let's Encrypt certificates
   - *self-signed* - CADLAB will generate a custom Certificate Authority and TLS certificates for your domain. The Certificate Authority certificate will be placed in the certificates directory of the swarm project.
   - *external* - specifies that external certificates will be used for CADLAB. If this option is selected, then you need to place certificates in pem format and corresponding keys in the certificates directory of the swarm project. If you install CADLAB as a stand-alone application you need to provide two pairs of certificate/keys for the host name you specified in the `hostname` setting and `git.[hostname]`. For example, cadlab.example.com.pem/cadlab.example.com.key and git.cadlab.example.com.pem/git.cadlab.example.com.key.
+- **custom_ca_key** - custom Certificate Authority key. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
+- **custom_ca_pem** - custom Certificate Authority cert file in pem format. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
+
+#### smtp
+By default CADLAB uses a built-in send-only mail server. In order for this mail server to deliver emails successfully you need to add an SPF record as described in the [Add DNS records](#add-dns-records) section. If you prefer using your own mail server, you can provide SMTP connection info in this section. `smtp` is an object of the following structure:
+
+```javascript
+{
+    ...
+    "smtp": {
+        "host": "example-mail-server.com",
+        "port": 25,
+        "username": "account_name",
+        "password": "account_password",
+    }
+    ...
+}
+```
+
+Below is the list of all object properties with available values:
+- **host** - hostname of your mail server
+- **port** - SMTP port
+- **username** - username of the email account you going to use send emails through
+- **password** - account password
+
+### Add license file
+
+Put your license.key file into configs directory of the swarm project. Do not modify or re-save the license file, as it will fail validation and license key will not be valid.
+
+### Start CADLAB swarm
+
+Now you're all good to deploy your swarm stack. From this swarm project directory run the following Docker command:
+
+```bash
+docker stack deploy --with-registry-auth -c stack.yml cadlab
+```
+
+Starting CADLAB for the first time will take quite some time, as Docker needs to download all the required images and perform initial installation. 
+
+CADLAB is currently running 5 services:
+- cadlab
+- git-server
+- mail-server
+- mysql
+- nginx
+
+You can monitor the process of the installation buy using the following Docker command:
+
+```bash
+docker service ls
+```
+
+
 
 - Install docker
 - Login to docker.cadlab.io
