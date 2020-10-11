@@ -43,7 +43,7 @@ docker version
 ```
 
 The output of this command should be somewhat like this:  
-![docker version](documentation/images/docker-version.png "Logo Title Text 1")
+![docker version](documentation/images/docker-version.png "Docker version")
 
 ### Login into docker.cadlab.io
 
@@ -241,7 +241,7 @@ You can monitor the process of the installation buy using the following Docker c
 docker service ls
 ```
 
-
+------------
 
 - Install docker
 - Login to docker.cadlab.io
@@ -251,10 +251,10 @@ docker service ls
 - clone repo with stack file
 - initiate swarm
 - create secrets
-
 - modify cadlab.json
 - Add license
 - deploy
+
   - view list of running services
   - view logs of container to identify issues
 
