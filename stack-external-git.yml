@@ -9,42 +9,25 @@ services:
     container_name: cadlab
     deploy:
       mode: global
-    environment:
-      CADLAB_INCLUDE_GIT: "true"
     image: docker.cadlab.io/cadlab-sh:1.18.7
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     secrets:
     - source: mysql_root_pass
     volumes:
-    - ./configs:/etc/cadlab:rw
-    - certs:/etc/ssl/cadlab:rw
-    - ./backups:/var/backups:rw
-    - git-backups:/var/git-backups:rw
-    - git-configs:/var/git-configs:rw
-    - ./logs:/var/log:rw
     - /var/run/docker.sock:/var/run/docker.sock:rw
     - source:/var/www:rw
-  git-server:
-    container_name: git-server
-    deploy:
-      mode: global
-    image: docker.cadlab.io/git-server:13.3.6-1.1
-    networks:
-      cadlab_net: {}
-    volumes:
-    - ./configs:/etc/cadlab:rw
-    - git-configs:/etc/gitlab:rw
     - certs:/etc/ssl/cadlab:rw
-    - git-data:/var/opt/gitlab:rw
-    - git-backups:/var/opt/gitlab/backups:rw
+    - ./configs:/etc/cadlab:rw
+    - ./backups:/var/backups:rw
+    - ./logs:/var/log:rw
   mail-server:
     container_name: mail-server
     deploy:
       mode: global
     image: docker.cadlab.io/mail-server:1.1
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     volumes:
     - ./configs:/etc/cadlab:rw
   mysql:
@@ -56,7 +39,7 @@ services:
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
     image: docker.cadlab.io/mysql-sh:1.0.12
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     secrets:
     - source: mysql_root_pass
     volumes:
@@ -69,31 +52,26 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-    environment:
-      CADLAB_INCLUDE_GIT: "true"
     image: docker.cadlab.io/nginx-sh:1.0.3
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     ports:
-    - published: 22
-      target: 22
     - published: 80
       target: 80
     - published: 443
       target: 443
+    - published: 22
+      target: 22
     volumes:
-    - ./certificates:/certificates:rw
-    - ./configs:/etc/cadlab:rw
-    - certs:/etc/ssl/cadlab:rw
-    - acme:/root/.acme.sh:rw
     - source:/var/www:rw
+    - acme:/root/.acme.sh:rw
+    - certs:/etc/ssl/cadlab:rw
+    - ./configs:/etc/cadlab:rw
+    - ./certificates:/certificates:rw
 version: '3.7'
 volumes:
   acme: {}
   certs: {}
   data: {}
-  git-backups: {}
-  git-configs: {}
-  git-data: {}
   source: {}
 
