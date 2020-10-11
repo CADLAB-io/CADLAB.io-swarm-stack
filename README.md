@@ -63,6 +63,8 @@ Add an A record for a domain/sub-domain you plan to use for CADLAB, for example:
 cadlab.company.com
 ```
 
+TODO: Add dns record for git.cadlab.company.com
+
 Additionally, add or modify an SPF record and include IP address of your CADLAB server. This step is needed in order for CADLAB to send emails. If you want CADLAB to send emails through your existing mail server, you can skip this step and specify custom mail server in the cadlab.json file. 
 
 The process of adding an SPF record depends on your domain registrar and is usually well documented. But it all comes down to adding a TXT record with a value of the following format:
@@ -79,6 +81,7 @@ This an optional step, but makes CADLAB update process more convenient. You can 
 
 ### Get CADLAB swarm stack compose file
 
+TODO: add link to releases page
 Clone this repository to your server or download the latest release from the [releases page]() on GitHub if you don't want to use git.
 
 Place the files in the `/var/cadlab` or another directory of your choice.
@@ -102,7 +105,8 @@ For better stability and security this installation should be run in a Docker sw
 docker swarm init
 ```
 
-Currently, CADLAB.io supposed to be run on a single node, so you can ignore swarm join tokens.
+Currently, CADLAB.io supposed to be run on a single node, so you can ignore swarm join tokens. 
+TODO: explain that join tokens will be displayed on the screen
 
 ### Create secrets
 
@@ -114,12 +118,14 @@ Create a text file with your password using vim or nano editor. Here is an examp
 cd /var/cadlab
 vi mysql_password.txt
 ```
+TODO: add explanation on how to enter edit mode i
+
 Then type your password and save the file, press `Esc`, type `:wq`, and press `enter`.
 
 Now we can create our Docker secret and delete the file with the password: 
 
 ```bash
-docker secret create mysql_root_password mysql_password.txt
+docker secret create mysql_root_pass mysql_password.txt
 rm mysql_password.txt
 ```
 
@@ -128,6 +134,7 @@ You can also create a secret without creating the text file by executing the fol
 ```bash
 echo "your_secure_password" | docker secret create mysql_root_password -
 ```
+TODO: add that history only for creating secret with echo
 
 But after that we recommend cleaning up your history, to make sure you password is not saved in plain text anywhere on the machine.
 
@@ -145,7 +152,7 @@ history -d <N>
 
 ### Configure CADLAB
 
-In order to config CADLAB you need to edit cadlab.json file, located in the configs directory. The settings file is in the JSON format and the very minimum you need to specify is a hostname:
+In order to config CADLAB you need to edit cadlab.json file, located in the `configs` directory. The settings file is in the JSON format and the very minimum you need to specify is a hostname:
 
 ```javascript
 {
@@ -153,7 +160,7 @@ In order to config CADLAB you need to edit cadlab.json file, located in the conf
 }
 ```
 
-Below is the list of settings you can specify.
+Below is the full list of settings you can specify.
 
 #### hostname
 A fully qualified domain name that you plan to use to access CADLAB.
@@ -167,10 +174,12 @@ Possible values:
 - weekly
 - monthly
 
-Backups are stored in the backups directory located in the swarm project. CADLAB will automatically rotate backups and keep 10 most recent backups.
+Backups are stored in the `backups` directory located in the swarm project. CADLAB will automatically rotate backups and keep 10 most recent backups.
 
 #### ssl_tls_support
-This settings controls if your CADLAB instance is going to be available over HTTP or HTTPS. By default HTTPS is disabled. `ssl_tls_support` is an object of the following structure:
+This setting controls if your CADLAB instance is going to be available over HTTP or HTTPS. By default HTTPS is disabled. `ssl_tls_support` is an object of the following structure:
+
+TODO: explain that it's disabled, but if they want to add they should this object
 
 ```javascript
 {
@@ -183,14 +192,15 @@ This settings controls if your CADLAB instance is going to be available over HTT
 }
 ```
 
+TODO: add explanation that lets encrypt works only if server is reachable from the internet
 Below is the list of all object properties with available values:
 - **enabled** - true/false enables HTTPS
-- **vendor** - specifies what certificates to use. Possible values are
+- **vendor** - specifies what certificates to use. Possible values are:
   - *letsencrypt* - CADLAB will automatically generate free Let's Encrypt certificates
   - *self-signed* - CADLAB will generate a custom Certificate Authority and TLS certificates for your domain. The Certificate Authority certificate will be placed in the certificates directory of the swarm project.
   - *external* - specifies that external certificates will be used for CADLAB. If this option is selected, then you need to place certificates in pem format and corresponding keys in the certificates directory of the swarm project. If you install CADLAB as a stand-alone application you need to provide two pairs of certificate/keys for the host name you specified in the `hostname` setting and `git.[hostname]`. For example, cadlab.example.com.pem/cadlab.example.com.key and git.cadlab.example.com.pem/git.cadlab.example.com.key.
-- **custom_ca_key** - custom Certificate Authority key. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
-- **custom_ca_pem** - custom Certificate Authority cert file in pem format. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
+- **custom_ca_key** - custom Certificate Authority (CA) key. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
+- **custom_ca_pem** - custom Certificate Authority (CA) cert file in pem format. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
 
 #### smtp
 By default CADLAB uses a built-in send-only mail server. In order for this mail server to deliver emails successfully you need to add an SPF record as described in the [Add DNS records](#add-dns-records) section. If you prefer using your own mail server, you can provide SMTP connection info in this section. `smtp` is an object of the following structure:
@@ -216,7 +226,7 @@ Below is the list of all object properties with available values:
 
 ### Add license file
 
-Put your license.key file into configs directory of the swarm project. Do not modify or re-save the license file, as it will fail validation and license key will not be valid.
+Put your license.key file into `configs` directory of the swarm project. Do not modify or re-save the license file, as it will fail validation and license key will not be valid.
 
 ### Start CADLAB swarm
 
