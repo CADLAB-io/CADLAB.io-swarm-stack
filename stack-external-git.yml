@@ -6,9 +6,12 @@ secrets:
     name: mysql_root_pass
 services:
   cadlab:
-    container_name: cadlab
     deploy:
       mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
     image: docker.cadlab.io/cadlab-sh:1.18.7
     networks:
       cadlab_net: null
@@ -22,16 +25,14 @@ services:
     - ./backups:/var/backups:rw
     - ./logs:/var/log:rw
   mail-server:
-    container_name: mail-server
     deploy:
       mode: global
-    image: docker.cadlab.io/mail-server:1.1
+    image: docker.cadlab.io/mail-server:1.0.1
     networks:
       cadlab_net: null
     volumes:
     - ./configs:/etc/cadlab:rw
   mysql:
-    container_name: mysql
     deploy:
       mode: global
     environment:
@@ -45,7 +46,6 @@ services:
     volumes:
     - data:/var/lib/mysql:rw
   nginx:
-    container_name: nginx
     deploy:
       mode: global
       restart_policy:
@@ -60,8 +60,6 @@ services:
       target: 80
     - published: 443
       target: 443
-    - published: 22
-      target: 22
     volumes:
     - source:/var/www:rw
     - acme:/root/.acme.sh:rw
