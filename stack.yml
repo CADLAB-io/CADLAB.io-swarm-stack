@@ -14,7 +14,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/cadlab-sh:1.18.7
+    image: docker.cadlab.io/cadlab-sh:1.18.8
     networks:
       cadlab_net: {}
     secrets:
@@ -43,7 +43,7 @@ services:
   mail-server:
     deploy:
       mode: global
-    image: docker.cadlab.io/mail-server:1.0.1
+    image: docker.cadlab.io/mail-server:1.0.2
     networks:
       cadlab_net: {}
     volumes:
