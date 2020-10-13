@@ -14,7 +14,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/cadlab-sh:1.18.8
+    image: docker.cadlab.io/cadlab-sh:1.18.9
     networks:
       cadlab_net: {}
     secrets:
