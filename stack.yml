@@ -6,12 +6,15 @@ secrets:
     name: mysql_root_pass
 services:
   cadlab:
-    container_name: cadlab
     deploy:
       mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/cadlab-sh:1.18.7
+    image: docker.cadlab.io/cadlab-sh:1.18.10
     networks:
       cadlab_net: {}
     secrets:
@@ -26,7 +29,6 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock:rw
     - source:/var/www:rw
   git-server:
-    container_name: git-server
     deploy:
       mode: global
     image: docker.cadlab.io/git-server:13.3.6-1.1
@@ -39,22 +41,20 @@ services:
     - git-data:/var/opt/gitlab:rw
     - git-backups:/var/opt/gitlab/backups:rw
   mail-server:
-    container_name: mail-server
     deploy:
       mode: global
-    image: docker.cadlab.io/mail-server:1.1
+    image: docker.cadlab.io/mail-server:1.0.2
     networks:
       cadlab_net: {}
     volumes:
     - ./configs:/etc/cadlab:rw
   mysql:
-    container_name: mysql
     deploy:
       mode: global
     environment:
       MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/mysql-sh:1.0.12
+    image: docker.cadlab.io/mysql-sh:1.0.13
     networks:
       cadlab_net: {}
     secrets:
@@ -62,7 +62,6 @@ services:
     volumes:
     - data:/var/lib/mysql:rw
   nginx:
-    container_name: nginx
     deploy:
       mode: global
       restart_policy:
@@ -71,7 +70,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/nginx-sh:1.0.3
+    image: docker.cadlab.io/nginx-sh:1.0.4
     networks:
       cadlab_net: {}
     ports:
