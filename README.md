@@ -43,7 +43,44 @@ docker version
 ```
 
 The output of this command should be somewhat like this:  
+
 ![docker version](documentation/images/docker-version.png "Docker version")
+
+### Move sshd to another port (stand-alone installation only)
+
+**Important**: This section is required only for self-hosted installation. If you install CADLAB with external git back-end like GitLab, you should skip this section.
+
+If you install CADLAB as a stand-alone application it start with a built-in git server, that requires SSH connection to interact with git repositories. Docker will proxies all SSH connections to the git container which makes it impossible to connect to the host machine via SSH. To workaround this issue we recommend moving sshd server to another port, for example 2222. In order to this you need to edit the sshd_config file.
+
+SSH into your server and edit the following file `/etc/ssh/sshd_config` using `vi` or `nano` editor.
+
+Somewhere close to the top of the file you should see the following section:
+
+```bash
+# The strategy used for options in the default sshd_config shipped with
+# OpenSSH is to specify options with their default value where
+# possible, but leave them commented.  Uncommented options override the
+# default value.
+
+Include /etc/ssh/sshd_config.d/*.conf
+
+#Port 22
+#AddressFamily any
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+```
+
+Uncomment the line `#Port 22` by removing the pound sign `#` and change `22` to `2222`. Now restart your sshd service by executing the following command:
+
+```bash
+service sshd restart
+```
+
+From now on, your sshd will be listening on port `2222` and there will be no conflicts with Docker. To connect to your host machine you will need to specify port like so:
+
+```bash
+ssh -p 2222 YOUR_USER@YOUR_IP
+```
 
 ### Login into docker.cadlab.io
 
@@ -63,7 +100,11 @@ Add an A record for a domain/sub-domain you plan to use for CADLAB, for example:
 cadlab.company.com
 ```
 
-TODO: Add dns record for git.cadlab.company.com
+If you install as a stand-alone application, you also need to create an a record for git service. It has to be the same domain/subdomain as fot he CADLAB app, but prepended with `git.` like so:
+
+```
+git.cadlab.company.com
+```
 
 Additionally, add or modify an SPF record and include IP address of your CADLAB server. This step is needed in order for CADLAB to send emails. If you want CADLAB to send emails through your existing mail server, you can skip this step and specify custom mail server in the cadlab.json file. 
 
@@ -105,12 +146,11 @@ For better stability and security this installation should be run in a Docker sw
 docker swarm init
 ```
 
-Currently, CADLAB.io supposed to be run on a single node, so you can ignore swarm join tokens. 
-TODO: explain that join tokens will be displayed on the screen
+After running this command you will see a message with a command you can use to add nodes to your swarm. Currently, CADLAB.io supposed to be run on a single node, so you can ignore swarm join tokens. 
 
 ### Create secrets
 
-Docker swarm provides a secure mechanism for managing secrets, e.g. passwords or other sensitive information. We will use secrets to create a database password.
+Docker swarm provides a secure mechanism for managing secrets, e.g. passwords or other sensitive information. We will use secrets to create a database password. Below we explain how to create a secret using a text file or input redirection.
 
 Create a text file with your password using vim or nano editor. Here is an example of how to do it with vim:
 
@@ -118,9 +158,8 @@ Create a text file with your password using vim or nano editor. Here is an examp
 cd /var/cadlab
 vi mysql_password.txt
 ```
-TODO: add explanation on how to enter edit mode i
 
-Then type your password and save the file, press `Esc`, type `:wq`, and press `enter`.
+Then press `i` to enter the editing mode, and type your password. To save the file, press `Esc`, type `:wq`, and press `enter`.
 
 Now we can create our Docker secret and delete the file with the password: 
 
@@ -129,14 +168,13 @@ docker secret create mysql_root_pass mysql_password.txt
 rm mysql_password.txt
 ```
 
-You can also create a secret without creating the text file by executing the following line:
+To create a secret using input redirection you need to perform the following commands:
 
 ```bash
 echo "your_secure_password" | docker secret create mysql_root_password -
 ```
-TODO: add that history only for creating secret with echo
 
-But after that we recommend cleaning up your history, to make sure you password is not saved in plain text anywhere on the machine.
+But after you create a secret using input redirection, we recommend cleaning up your history. This way you can make sure your password is not saved in plain text anywhere on the machine.
 
 To delete your command from the history first run:
 
@@ -144,7 +182,7 @@ To delete your command from the history first run:
 history
 ```
 
-Locate your password creation password in the list and use its line number to delete it from the history:
+Locate your secret creation line in the list and use its line number to delete it from the history:
 
 ```bash
 history -d <N>
@@ -160,7 +198,7 @@ In order to config CADLAB you need to edit cadlab.json file, located in the `con
 }
 ```
 
-Below is the full list of settings you can specify.
+To further configure CADLAB you can add additional settings to the file. Below is the full list of settings you can specify.
 
 #### hostname
 A fully qualified domain name that you plan to use to access CADLAB.
@@ -177,9 +215,7 @@ Possible values:
 Backups are stored in the `backups` directory located in the swarm project. CADLAB will automatically rotate backups and keep 10 most recent backups.
 
 #### ssl_tls_support
-This setting controls if your CADLAB instance is going to be available over HTTP or HTTPS. By default HTTPS is disabled. `ssl_tls_support` is an object of the following structure:
-
-TODO: explain that it's disabled, but if they want to add they should this object
+This setting controls if your CADLAB instance is going to be available over HTTP or HTTPS. If this setting is not added, then HTTPS is disabled by default. `ssl_tls_support` is an object of the following structure:
 
 ```javascript
 {
@@ -196,9 +232,10 @@ TODO: add explanation that lets encrypt works only if server is reachable from t
 Below is the list of all object properties with available values:
 - **enabled** - true/false enables HTTPS
 - **vendor** - specifies what certificates to use. Possible values are:
-  - *letsencrypt* - CADLAB will automatically generate free Let's Encrypt certificates
-  - *self-signed* - CADLAB will generate a custom Certificate Authority and TLS certificates for your domain. The Certificate Authority certificate will be placed in the certificates directory of the swarm project.
-  - *external* - specifies that external certificates will be used for CADLAB. If this option is selected, then you need to place certificates in pem format and corresponding keys in the certificates directory of the swarm project. If you install CADLAB as a stand-alone application you need to provide two pairs of certificate/keys for the host name you specified in the `hostname` setting and `git.[hostname]`. For example, cadlab.example.com.pem/cadlab.example.com.key and git.cadlab.example.com.pem/git.cadlab.example.com.key.
+  - *letsencrypt* - CADLAB will automatically generate free Let's Encrypt certificates. **IMPORTANT**: Let's Encrypt needs to be able to access your CADLAB installation in order to validate the certificates. If the server you install CADLAB on is not reachable from the internet, then you need to chose `external` or `self-signed` option.
+  - *self-signed* - CADLAB will generate a custom Certificate Authority (CA) and TLS certificates for your domain. The Certificate Authority certificate will be placed in the certificates directory of the swarm project. In order for your users to access the website, they will need to add the generated CA to their computers. The instructions on how to add a custom CA depend on an operating system and are covered in [this section]().
+  TODO: add link
+  - *external* - specifies that external certificates will be used for CADLAB. If this option is selected, then you need to place certificates in the pem format and corresponding keys in the certificates directory of the swarm project. If you install CADLAB as a stand-alone application you need to provide two pairs of certificate/keys for the host name you specified in the `hostname` setting and `git.[hostname]`. For example, cadlab.example.com.pem/cadlab.example.com.key and git.cadlab.example.com.pem/git.cadlab.example.com.key.
 - **custom_ca_key** - custom Certificate Authority (CA) key. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
 - **custom_ca_pem** - custom Certificate Authority (CA) cert file in pem format. You can specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority, or if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
 
@@ -226,7 +263,16 @@ Below is the list of all object properties with available values:
 
 ### Add license file
 
-Put your license.key file into `configs` directory of the swarm project. Do not modify or re-save the license file, as it will fail validation and license key will not be valid.
+Put your license.key file into `configs` directory of the swarm project. Do not modify or re-save the license file, as it will fail validation and license key will not be valid. 
+
+You can copy the license file from your local machine to the server in multiple ways. For example, if you're on Mac or Linux you can use the `scp` [command](http://www.hypexr.org/linux_scp_help.php) like so:
+
+```
+scp -P 2222 license.key YOUR_USER@YOUR_IP /var/cadlab/configs
+```
+`-P` stands for port, you will need to use this if you install CADLAB as a stand-alone application, since CADLAB uses standard SSH port `22` to work with your git container. If you use external git back-end like GitLab, you can omit this option.
+
+On Windows you can use [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or SFTP client like [FileZilla](https://filezilla-project.org/)
 
 ### Start CADLAB swarm
 
