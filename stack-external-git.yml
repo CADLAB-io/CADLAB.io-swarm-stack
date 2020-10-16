@@ -12,7 +12,7 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/cadlab-sh:1.18.10
+    image: docker.cadlab.io/cadlab-sh:1.18.13
     networks:
       cadlab_net: null
     secrets:
@@ -22,11 +22,15 @@ services:
     - source:/var/www:rw
     - certs:/etc/ssl/cadlab:rw
     - ./configs:/etc/cadlab:rw
-    - ./backups:/var/backups:rw
+    - ./backups:/var/cadlab/backups:rw
     - ./logs:/var/log:rw
   mail-server:
     deploy:
       mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
     image: docker.cadlab.io/mail-server:1.0.2
     networks:
       cadlab_net: null
@@ -35,10 +39,14 @@ services:
   mysql:
     deploy:
       mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
     environment:
       MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/mysql-sh:1.0.12
+    image: docker.cadlab.io/mysql-sh:1.0.14
     networks:
       cadlab_net: null
     secrets:
@@ -52,7 +60,7 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/nginx-sh:1.0.3
+    image: docker.cadlab.io/nginx-sh:1.0.4
     networks:
       cadlab_net: null
     ports:
