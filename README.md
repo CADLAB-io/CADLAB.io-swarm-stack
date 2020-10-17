@@ -228,7 +228,6 @@ This setting controls if your CADLAB instance is going to be available over HTTP
 }
 ```
 
-TODO: add explanation that lets encrypt works only if server is reachable from the internet
 Below is the list of all object properties with available values:
 - **enabled** - true/false enables HTTPS
 - **vendor** - specifies what certificates to use. Possible values are:
@@ -276,28 +275,130 @@ On Windows you can use [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putt
 
 ### Start CADLAB swarm
 
-Now you're all good to deploy your swarm stack. From this swarm project directory run the following Docker command:
+Now you're all good to deploy your swarm stack. Depending on whether you want to deploy CADLAB as a stand-alone app or with an external git back-end, you need to execute a `docker stack deploy` command with a specific stack file.
+
+To install a stand-alone version of CADLAB you need to execute the following command in the `/var/cadlab` directory:
 
 ```bash
 docker stack deploy --with-registry-auth -c stack.yml cadlab
 ```
 
+To install CADLAB with an external git back-end like GitLab use this command: 
+
+```bash
+docker stack deploy --with-registry-auth -c stack-external-git.yml cadlab
+```
+
 Starting CADLAB for the first time will take quite some time, as Docker needs to download all the required images and perform initial installation. 
 
-CADLAB is currently running 5 services:
+The stand-alone version of CADLAB is currently running 5 services:
 - cadlab
 - git-server
 - mail-server
 - mysql
 - nginx
 
-You can monitor the process of the installation buy using the following Docker command:
+If you run CADLAB with external git back-end like GitLab, then `git-server` service is not included and you should have 4 services running.
+
+### Checking services status
+
+After you started you swarm, you need to make sure that all services started successfully. In order to do it, you can run the following Docker command:
+
+```bash
+docker stack ps cadlab
+```
+
+It should list of all running or failed services in your CADLAB stack.
+
+![docker stack ps](documentation/images/docker-stack-ps.png "Docker stack ps command output")
+
+You can see that some container are already running, while others are preparing or starting. If everything is going well, after some time you should see that all container are running.
+
+You can also list all services by executing the following Docker command:
 
 ```bash
 docker service ls
 ```
 
+The output of this command will be similar to this one:
+
+![docker service ls](documentation/images/docker-service-ls.png "Docker service ls command output")
+
+The healthy application state is when you have all services running with `1/1` in the replicas column.
+
+### Troubleshooting
+
+If not all of your services are running properly, you will see that in the output of `docker stack ps cadlab` command or `docker service ls` command. Usually service won't start because of incorrect `cadlab.json` file. For example, if you made a mistake in `automatic_backups` setting, the output of the `ps` command would looks like this:
+
+![docker stack ps cadlab - failed service](documentation/images/docker-stack-ps-failed.png "Docker stack ps command output")
+
+On the screenshot above we see that after cadlab container failed Docker tried to restart it 3 more times, but couldn't do it. We also see that there was a non-zero exit form the container, so we need to inspect logs to see what went wrong.
+
+If you list all services, you will also notice that cadlab service has `0/0` in the replicas column, which means that cadlab container is not running:
+
+![docker service ls - failed service](documentation/images/docker-service-ls-failed.png "Docker service ls command output")
+
+To inspect logs for a service you need to perform the following command:
+
+```bash
+docker service logs cadlab_cadlab
+```
+
+The last argument in this command is service name, which you can find out from the `docker service ls` command. You can also add `-f` flag to the logs command to view logs in real time like so `docker service logs -f cadlab_cadlab` and exit logs by pressing `ctlr+c`.
+
+Below is the log output for the failed cadlab container:
+
+![docker service logs](documentation/images/docker-service-logs.png "Docker service logs command output")
+
+We can see that `automatic_backups` setting was incorrectly configured in the cadlab.json file.
+
+After fixing the mistake in cadlab.json file you need to restart your failed service. First you need to delete the failed service(s), those with `0/0` replicas, by executing the following command:
+
+```bash
+docker service rm cadlab_cadlab
+```
+- where cadlab_cadlab is the name of the service. 
+
+If you have more than one failed service you can delete all of them individually, or delete the whole stack like this:
+
+```bash
+docker stack rm cadlab
+```
+
+After you fixed the cadlab.json file and removed all failed services, you need to redeploy your stack by executing the command from the [Start CADLAB swarm](#start-cadlab-swarm).
+
+If any container doesn't start, you need to repeat the troubleshooting steps.
+
+### Changing CADLAB configurations
+
+Sometimes you may need to change CADLAB configuration after app was successfully deployed. In order to do this you need to modify `cadlab.json` file and execute a reconfigure command for CADLAB.
+
+After you modified your your `cadlab.json` file execute the following command:
+
+```bash
+docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab reconfigure
+```
+**Note**: this weird long string is a dynamically generated container name in a Docker swarm. But you don't need to type it manually. When you write exec command just type `docker exec -it cadlab_cadlab` and press `tab` this will autocomplete the container name. After that type the `cadlab` utility and CADLAB command to execute, in this case `reconfigure`.
+
+If autocomplete didn't work on your machine, you can use an alternative way to execute this command. First, list all container by executing the following command:
+
+```bash
+docker container ls
+```
+
+![docker container ls](documentation/images/docker-container-ls.png "Docker container ls command output")
+
+Then copy the container ID of cadlab container and use this ID instead of container name like this:
+
+```bash
+docker exec -it 6803aaa81bbf cadlab reconfigure
+```
+
 ------------
+
+
+
+
 
 - Install docker
 - Login to docker.cadlab.io
@@ -310,17 +411,19 @@ docker service ls
 - modify cadlab.json
 - Add license
 - deploy
-
   - view list of running services
   - view logs of container to identify issues
+- CADLAB settings
+  - hostname
+  - ssl_tls
+  - smtp
+
+
 
 Updating CADLAB
 Changing CADLAB configuration file
 Backup & Restore
 Clear Cache
-CADLAB settings
-    - hostname
-    - ssl_tls
-    - smtp
+
 
 
