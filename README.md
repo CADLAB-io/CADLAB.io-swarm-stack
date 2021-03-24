@@ -190,7 +190,7 @@ history -d <N>
 
 ### Configure CADLAB
 
-In order to config CADLAB you need to edit cadlab.json file, located in the `configs` directory. The settings file is in the JSON format and the very minimum you need to specify is a hostname:
+In order to config CADLAB you need to edit cadlab.json file, located in the `/var/cadlab/configs` directory. The settings file is in the JSON format and the very minimum you need to specify is a hostname:
 
 ```javascript
 {
@@ -212,7 +212,7 @@ Possible values:
 - weekly
 - monthly
 
-Backups are stored in the `backups` directory located in the swarm project. CADLAB will automatically rotate backups and keep 10 most recent backups.
+Backups are stored in the `/var/cadlab/backups` directory located in the swarm project. CADLAB will automatically rotate backups and keep 10 most recent backups.
 
 #### ssl_tls_support
 This setting controls if your CADLAB instance is going to be available over HTTP or HTTPS. If this setting is not added, then HTTPS is disabled by default. `ssl_tls_support` is an object of the following structure:
@@ -262,7 +262,7 @@ Below is the list of all object properties with available values:
 
 ### Add license file
 
-Put your license.key file into `configs` directory of the swarm project. Do not modify or re-save the license file, as it will fail validation and license key will not be valid. 
+Put your license.key file into `/var/cadlab/configs` directory of the swarm project. Do not modify or re-save the license file, as it will fail validation and license key will not be valid. 
 
 You can copy the license file from your local machine to the server in multiple ways. For example, if you're on Mac or Linux you can use the `scp` [command](http://www.hypexr.org/linux_scp_help.php) like so:
 
@@ -283,7 +283,7 @@ To install a stand-alone version of CADLAB you need to execute the following com
 docker stack deploy --with-registry-auth -c stack.yml cadlab
 ```
 
-To install CADLAB with an external git back-end like GitLab use this command: 
+To install CADLAB with an external git back-end, like GitLab, use this command: 
 
 ```bash
 docker stack deploy --with-registry-auth -c stack-external-git.yml cadlab
@@ -378,7 +378,7 @@ After you modified your your `cadlab.json` file execute the following command:
 ```bash
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab reconfigure
 ```
-**Note**: this weird long string is a dynamically generated container name in a Docker swarm. But you don't need to type it manually. When you write exec command just type `docker exec -it cadlab_cadlab` and press `tab` this will autocomplete the container name. After that type the `cadlab` utility and CADLAB command to execute, in this case `reconfigure`.
+**Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. But you don't need to type it manually. When you write exec command just type `docker exec -it cadlab_cadlab` and press `tab` this will autocomplete the container name. After that type the `cadlab` utility and CADLAB command to execute, in this case `reconfigure`.
 
 If autocomplete didn't work on your machine, you can use an alternative way to execute this command. First, list all container by executing the following command:
 
@@ -393,6 +393,85 @@ Then copy the container ID of cadlab container and use this ID instead of contai
 ```bash
 docker exec -it 6803aaa81bbf cadlab reconfigure
 ```
+
+### Updating CADLAB
+
+When new release of CADLAB is available, you need to pull changes from this repository if you use git, or download a new release from the Releases page to the `/var/cadlab` directory.
+
+Then perform the same `docker stack deploy` command we've already covered in the [Start CADLAB swarm](#start-cadlab-swarm) section.
+
+
+### Backup & restore CADLAB
+
+#### Backing up CADLAB
+When you configure CADLAB, you can set `automatic_backups` option in the `cadlab.json` file to make CADLAB perform backups on a regular basis. Read about this setting [here](#automatic_backups). CADLAB database, files and git data (for stand-alone installation) will be automatically backed up and stored in the `/var/cadlab/backups` directory. CADLAB will store 10 the most recent backup files. Backups are named using the following format `[current_timestamp]-yyyy-mm-dd_cadlab.tar.gz`.
+
+You can also perform backups manually using CADLAB command line utility. In order to do this, we need to execute a command in the `cadlab` container. 
+
+```bash
+docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab backup
+```
+**Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. See the [Changing CADLAB configurations](#changing-cadlab-configurations) section for guidance on how to find out what is your unique container name.
+
+Depending on your backup strategy, you then can copy backups to Amazon S3 or another server in your network.
+
+#### Restoring CADLAB
+
+When you need to restore CADLAB data from a backup, you can do that using the CADLAB command line utility. By default, CADLAB will restore the most recent backup from the `/var/cadlab/backups` directory. In order to do this execute the following command:
+
+```bash
+docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab restore
+```
+**Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. See the [Changing CADLAB configurations](#changing-cadlab-configurations) section for guidance on how to find out what is your unique container name.
+
+The command line utility will tell you what backup it is going to restore and ask for your confirmation.
+
+If you need to restore a specific backup, you can add a `--file=FILENAME` option to specify filename of the backup you want to restore. Please note, that this backup should be in the `/var/cadlab/backups` directory.
+
+```bash
+docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab restore --file=1602549045-2020-10-13_cadlab.tar.gz
+```
+
+### CADLAB command line utility
+
+CADLAB offers a command line utility to help you manage your CADLAB installation. It currently allows you to backup, restore, and reconfigure CADLAB. The utility executable is called `cadlab` and can be used from within the `cadlab` container. Run the following Docker command to view command line utility help output:
+
+```bash
+docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab
+```
+**Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. See the [Changing CADLAB configurations](#changing-cadlab-configurations) section for guidance on how to find out what is your unique container name.
+
+To execute one of the commands, for example, `reconfigure`, run the following Docker command:
+
+```bash
+docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab reconfigure
+```
+
+### Integrating with GitLab
+
+If you chose to install CADLAB with an external git back-end, for example, GitLab, you need to use `stack-external-git.yml` file to [start the swarm](#start-cadlab-swarm). After CADLAB application successfully starts, you need to integrate it with your self-hosted GitLab installation.
+
+Open URL you specified in the `hostname` [here](#hostname) in your browser and you should see a CADLAB welcome screen:
+
+![CADLAB.io Welcome screen](documentation/images/cadlab-gitlab-url.png "CADLAB Welcome screen")
+
+On this screen you need to enter the URL of your GitLab installation so that CADLAB can connect to GitLab's API. **Please note**: if your GitLab installation is deployed to a private network, CADLAB also needs to be deployed to the same network so that it's able to connect to GitLab's API.
+
+Submit the form and proceed to the next step:
+
+![CADLAB.io create integration](documentation/images/cadlab-gitlab-callback-url.png "Integration creation step")
+
+If CADLAB was able to connect to your GitLab, you should see the integration settings form like in the screenshot above. Copy the Callback URL from the form and proceed to creating an application in GitLab.
+
+In your GitLab, go to Admin area (1), then Applications (2) in the left-hand side navigation, and click "New Application". 
+
+![GitLab New Application](documentation/images/gitlab-new-applicatoin.png "GitLab New Application")
+
+On the "New Application" page, provide application name (1), paste CADLAB callback URL (2), tick "api" checkbox (3), and submit the form.
+
+GitLab will create an application and generate Application ID and Secret key, which you need to copy back to CADLAB form:
+
+![GitLab Application](documentation/images/gitlab-applicatoin-id.png "GitLab Application")
 
 ------------
 
@@ -417,13 +496,15 @@ docker exec -it 6803aaa81bbf cadlab reconfigure
   - hostname
   - ssl_tls
   - smtp
+- Changing CADLAB configuration file
+- Updating CADLAB
+- Backup & Restore
+- CADLAB Utility
 
 
 
-Updating CADLAB
-Changing CADLAB configuration file
-Backup & Restore
-Clear Cache
+Integrating with GitLab
+
 
 
 
