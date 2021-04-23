@@ -305,7 +305,7 @@ Put your `license.key` file into the `/var/cadlab/configs` directory of the swar
 You can copy the license file from your local machine to the server in multiple ways. For example, if you're on Mac or Linux, you can use the `scp` [command](http://www.hypexr.org/linux_scp_help.php) like so:
 
 ```
-scp -P 2222 license.key YOUR_USER@YOUR_IP /var/cadlab/configs
+scp -P 2222 license.key YOUR_USER@YOUR_IP:/var/cadlab/configs
 ```
 `-P` stands for the port. You will need to use this if you install CADLAB as a stand-alone application since CADLAB uses standard SSH port `22` to work with your git container. If you use an external git back-end like GitLab, you can omit this option.
 
