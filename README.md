@@ -4,6 +4,38 @@ This project provides a compose file and directory structure to run a self-hoste
 
 **Table of contents**
 
+  - [About CADLAB.io](#about-cadlabio)
+  - [Installation](#installation)
+    - [System requirements](#system-requirements)
+    - [Install Docker](#install-docker)
+    - [Move sshd to another port (stand-alone installation only)](#move-sshd-to-another-port-stand-alone-installation-only)
+    - [Login into docker.cadlab.io](#login-into-dockercadlabio)
+    - [Add DNS records](#add-dns-records)
+    - [Install git](#install-git)
+    - [Get CADLAB swarm stack compose file](#get-cadlab-swarm-stack-compose-file)
+    - [Init swarm](#init-swarm)
+    - [Create secrets](#create-secrets)
+    - [Configure CADLAB](#configure-cadlab)
+      - [hostname](#hostname)
+      - [automatic_backups](#automatic_backups)
+      - [ssl_tls_support](#ssl_tls_support)
+      - [smtp](#smtp)
+    - [Add license file](#add-license-file)
+    - [Start CADLAB swarm](#start-cadlab-swarm)
+    - [Checking services status](#checking-services-status)
+  - [Troubleshooting](#troubleshooting)
+    - [Checking container health](#checking-container-health)
+    - [502 bad gateway](#502-bad-gateway)
+  - [Changing CADLAB configurations](#changing-cadlab-configurations)
+  - [Updating CADLAB](#updating-cadlab)
+  - [Backup & restore CADLAB](#backup--restore-cadlab)
+    - [Backing up CADLAB](#backing-up-cadlab)
+    - [Restoring CADLAB](#restoring-cadlab)
+  - [CADLAB command-line utility](#cadlab-command-line-utility)
+  - [Integrating with GitLab](#integrating-with-gitlab)
+
+
+
 ## About CADLAB.io
 
 [CADLAB.io](https://cadlab.io) is a git-based visual version control platform for collaborative PCB design. What makes CADLAB different from platforms like GitHub, GitLab, BitBucket, and other software-oriented platforms, is that CADLAB is hardware-focused. It currently supports popular PCB design vendors like Altium, Autodesk Eagle, and KiCad. CADLAB works with native design files and renders schematics and PCB layouts right in a browser - no need to export, import, or install anything. Just commit your design files to a repository, and you're good to go. One of the most powerful CADLAB features is interactive visual diff for schematics and PCBs. You can compare any two revisions of your design and see what exactly was changed from one version to another. Together with the annotation feature, it enables hardware engineers to build a truly collaborative design process. Quality control and peer-review of design haven't been easier. You can find more information on our website https://cadlab.io.
@@ -122,8 +154,7 @@ This an optional step but makes CADLAB update process more convenient. You can f
 
 ### Get CADLAB swarm stack compose file
 
-TODO: add link to releases page
-Clone this repository to your server or download the latest release from the [releases page]() on GitHub if you don't want to use git.
+Clone this repository to your server or download the latest release from the [releases page](https://github.com/CADLAB-io/CADLAB.io-swarm-stack/releases/) on GitHub if you don't want to use git.
 
 Place the files in the `/var/cadlab`.
 
@@ -333,8 +364,9 @@ The output of this command will be similar to this one:
 
 The healthy application state is when you have all services running with `1/1` in the replicas column.
 
-### Troubleshooting
+## Troubleshooting
 
+### Checking container health
 If not all of your services are running properly, you will see that in the output of the `docker stack ps cadlab` command or `docker service ls` command. Usually, a service won't start because of an incorrect `cadlab.json` file. For example, if you made a mistake in the `automatic_backups` setting, the output of the `ps` command would look like this:
 
 ![docker stack ps cadlab - failed service](documentation/images/docker-stack-ps-failed.png "Docker stack ps command output")
@@ -376,10 +408,10 @@ After you fixed the cadlab.json file and removed all failed services, you need t
 
 If any container doesn't start, you need to repeat the troubleshooting steps.
 
-#### 502 bad gateway
+### 502 bad gateway
 Sometimes you can get a 502 bad gateway error when trying to access the website even though all docker services are running without errors. It usually happens when you try to access the website while CADLAB is still being installed. In this case, wait a minute or two and try refreshing your browser.
 
-### Changing CADLAB configurations
+## Changing CADLAB configurations
 
 Sometimes you may need to change the CADLAB configuration after the app was successfully deployed. In order to do this, you need to modify the `cadlab.json` file and execute a reconfigure command for CADLAB.
 
@@ -404,16 +436,16 @@ Then copy the container ID of the cadlab container and use this ID instead of th
 docker exec -it 6803aaa81bbf cadlab reconfigure
 ```
 
-### Updating CADLAB
+## Updating CADLAB
 
 When a new release of CADLAB is available, you need to pull changes from this repository if you use git or download a new release from the Releases page to the `/var/cadlab` directory.
 
 Then perform the same `docker stack deploy` command we've already covered in the [Start CADLAB swarm](#start-cadlab-swarm) section.
 
 
-### Backup & restore CADLAB
+## Backup & restore CADLAB
 
-#### Backing up CADLAB
+### Backing up CADLAB
 When you configure CADLAB, you can set the `automatic_backups` option in the `cadlab.json` file to make CADLAB perform backups on a regular basis. Read about this setting [here](#automatic_backups). CADLAB database, files, and git data (for stand-alone installation) will be automatically backed up and stored in the `/var/cadlab/backups` directory. CADLAB will store 10 of the most recent backup files. Backups are named using the following format `[current_timestamp]-yyyy-mm-dd_cadlab.tar.gz`.
 
 You can also perform backups manually using the CADLAB command-line utility. In order to do this, we need to execute a command in the `cadlab` container. 
@@ -425,7 +457,7 @@ docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ks
 
 Depending on your backup strategy, you then can copy backups to Amazon S3 or another server in your network.
 
-#### Restoring CADLAB
+### Restoring CADLAB
 
 When you need to restore CADLAB data from a backup, you can do that using the CADLAB command-line utility. By default, CADLAB will restore the most recent backup from the `/var/cadlab/backups` directory. In order to do this, execute the following command:
 
@@ -442,7 +474,7 @@ If you need to restore a specific backup, you can add a `--file=FILENAME` option
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab restore --file=1602549045-2020-10-13_cadlab.tar.gz
 ```
 
-### CADLAB command-line utility
+## CADLAB command-line utility
 
 CADLAB offers a command-line utility to help you manage your CADLAB installation. It currently allows you to clear the application cache, backup, restore, and reconfigure CADLAB. The utility executable is called `cadlab` and can be used from within the `cadlab` container. Run the following Docker command to view command-line utility help output:
 
@@ -457,7 +489,7 @@ To execute one of the commands, for example, `reconfigure`, run the following Do
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab reconfigure
 ```
 
-### Integrating with GitLab
+## Integrating with GitLab
 
 If you chose to install CADLAB with an external git back-end, for example, GitLab, you need to use the `stack-external-git.yml` file to [start the swarm](#start-cadlab-swarm). After the CADLAB application successfully starts, you need to integrate it with your self-hosted GitLab installation.
 
