@@ -1,0 +1,1 @@
+Use this folder to upload custom SSL/TLS certificates to CADLAB.

@@ -1,0 +1,1 @@
+This folder contains CADLAB configuration file and a license key.

@@ -1,0 +1,1 @@
+This folder contains application and system logs.

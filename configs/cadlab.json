@@ -1,4 +1,3 @@
 {
-    "hostname": "cadlab.local",
-    "automatic_backups" : "daily"
+    "hostname": "cadlab.example.com"
 }
