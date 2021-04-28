@@ -1,6 +1,9 @@
 .DS_Store
-logs
+logs/*
 !logs/README.md
+!logs/*/
+logs/*/*
+!logs/*/README.md
 backups
 !backups/README.md
 certificates
