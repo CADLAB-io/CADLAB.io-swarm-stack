@@ -159,7 +159,7 @@ Clone this repository to your server or download the latest release from the [re
 Place the files in the `/var/cadlab`.
 
 ```bash
-git clone https://github.com/CADLAB-io/docker-swarm-stack.git /var/cadlab
+git clone https://github.com/CADLAB-io/CADLAB.io-swarm-stack.git /var/cadlab
 ```
 
 ### Init swarm
@@ -293,10 +293,14 @@ By default, CADLAB uses a built-in send-only mail server. In order for this mail
 ```
 
 Below is the list of all object properties with available values:
-- **host** - hostname of your mail server
-- **port** - SMTP port
-- **username** - username of the email account you are going to use to send emails through
-- **password** - account password
+- **host** - hostname of your mail server.
+- **port** - SMTP port.
+- **protocol** - (optional) encrypted protocol. Skip this setting if your server doesn't require secure connection. Possible values are:
+  - tls
+  - ssl
+- **from** - email address to be used as a sender.
+- **username** - username of the email account you are going to use to send emails through. This setting is required only if your SMTP server requires authentication.
+- **password** - account password. This setting is required only if your SMTP server requires authentication.
 
 ### Add license file
 
