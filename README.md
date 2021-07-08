@@ -294,7 +294,7 @@ By default, CADLAB uses a built-in send-only mail server. In order for this mail
 
 Below is the list of all object properties with available values:
 - **host** - hostname of your mail server.
-- **port** - SMTP port.
+- **port** - SMTP port. It depends on your mail server setup, but usually, 587 if an encrypted protocol is used, or 25 as the default SMTP port.
 - **protocol** - (optional) encrypted protocol. Skip this setting if your server doesn't require secure connection. Possible values are:
   - tls
   - ssl

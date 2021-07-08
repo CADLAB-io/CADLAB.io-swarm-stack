@@ -12,7 +12,7 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/cadlab-sh:1.18.15
+    image: docker.cadlab.io/cadlab-sh:1.18.16
     networks:
       cadlab_net: {}
     secrets:
@@ -46,7 +46,7 @@ services:
     environment:
       MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/mysql-sh:1.0.14
+    image: docker.cadlab.io/mysql-sh:1.0.15
     networks:
       cadlab_net: {}
     secrets:
