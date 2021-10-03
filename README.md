@@ -1,3 +1,5 @@
+View this project on [CADLAB.io](http://cadlab.local/project/1718). 
+
 # Docker swarm stack for a self-hosted installation of CADLAB.io
 
 This project provides a compose file and directory structure to run a self-hosted version of [CADLAB.io](https://cadlab.io).
