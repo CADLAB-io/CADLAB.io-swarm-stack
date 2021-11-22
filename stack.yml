@@ -9,7 +9,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/cadlab-sh:1.18.19
+    image: docker.cadlab.io/cadlab-sh:1.18.20
     networks:
       cadlab_net: null
     secrets:
@@ -58,7 +58,7 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/git-server:13.3.6-1.1
+    image: docker.cadlab.io/git-server:13.3.6-1.2
     networks:
       cadlab_net: null
     volumes:
@@ -94,7 +94,7 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/mail-server:1.0.2
+    image: docker.cadlab.io/mail-server:1.0.3
     networks:
       cadlab_net: null
     volumes:
@@ -113,7 +113,7 @@ services:
     environment:
       MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/mysql-sh:1.0.16
+    image: docker.cadlab.io/mysql-sh:1.0.17
     networks:
       cadlab_net: null
     secrets:
@@ -137,19 +137,19 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/nginx-sh:1.0.6
+    image: docker.cadlab.io/nginx-sh:1.0.7
     networks:
       cadlab_net: null
     ports:
-    - mode: ingress
+    - mode: host
       target: 22
       published: 22
       protocol: tcp
-    - mode: ingress
+    - mode: host
       target: 80
       published: 80
       protocol: tcp
-    - mode: ingress
+    - mode: host
       target: 443
       published: 443
       protocol: tcp
