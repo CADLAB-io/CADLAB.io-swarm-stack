@@ -7,7 +7,7 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/cadlab-sh:1.18.20
+    image: docker.cadlab.io/cadlab-sh:1.18.21
     networks:
       cadlab_net: null
     secrets:
