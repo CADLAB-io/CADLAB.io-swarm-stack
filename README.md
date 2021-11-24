@@ -484,6 +484,8 @@ docker exec -it 6803aaa81bbf cadlab reconfigure
 
 ## Updating CADLAB
 
+**Important:** Please [make a backup](#backing-up-cadlab) before updating your CADLAB installation. It will help restore your data if the update process goes not according to plan.
+
 When a new release of CADLAB is available, you need to pull changes from this repository if you use git or download a new release from the Releases page to the `/var/cadlab` directory.
 
 Then perform the same `docker stack deploy` command we've already covered in the [Start CADLAB swarm](#start-cadlab-swarm) section.
