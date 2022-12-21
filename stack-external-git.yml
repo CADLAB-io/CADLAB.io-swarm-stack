@@ -9,10 +9,10 @@ services:
     deploy:
       mode: global
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/cadlab-sh:1.19.2
+    image: docker.cadlab.io/cadlab-sh:1.19.3
     networks:
       cadlab_net: {}
     secrets:
@@ -28,7 +28,7 @@ services:
     deploy:
       mode: global
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 5s
         max_attempts: 3
     image: docker.cadlab.io/mail-server:1.0.4
@@ -40,7 +40,7 @@ services:
     deploy:
       mode: global
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 5s
         max_attempts: 3
     environment:
@@ -58,7 +58,7 @@ services:
     deploy:
       mode: global
       restart_policy:
-        condition: on-failure
+        condition: any
         delay: 5s
         max_attempts: 3
     image: docker.cadlab.io/nginx-sh:1.0.9
