@@ -2,9 +2,13 @@
 
 This project provides a compose file and directory structure to run a self-hosted version of [CADLAB.io](https://cadlab.io).
 
+## Support
+For support inquiries please contact info@cadlab.io.
+
 **Table of contents**
 
 - [Docker swarm stack for a self-hosted installation of CADLAB.io](#docker-swarm-stack-for-a-self-hosted-installation-of-cadlabio)
+  - [Support](#support)
   - [About CADLAB.io](#about-cadlabio)
   - [Installation](#installation)
     - [System requirements](#system-requirements)
@@ -18,10 +22,10 @@ This project provides a compose file and directory structure to run a self-hoste
     - [Create secrets](#create-secrets)
     - [Configure CADLAB](#configure-cadlab)
       - [hostname](#hostname)
-      - [automatic_backups](#automatic_backups)
-      - [ssl_tls_support](#ssl_tls_support)
+      - [automatic\_backups](#automatic_backups)
+      - [ssl\_tls\_support](#ssl_tls_support)
       - [smtp](#smtp)
-      - [reverse_proxy](#reverse_proxy)
+      - [reverse\_proxy](#reverse_proxy)
     - [Add license file](#add-license-file)
     - [Start CADLAB swarm](#start-cadlab-swarm)
     - [Checking services status](#checking-services-status)
@@ -30,7 +34,7 @@ This project provides a compose file and directory structure to run a self-hoste
     - [502 bad gateway](#502-bad-gateway)
   - [Changing CADLAB configurations](#changing-cadlab-configurations)
   - [Updating CADLAB](#updating-cadlab)
-  - [Backup & restore CADLAB](#backup--restore-cadlab)
+  - [Backup \& restore CADLAB](#backup--restore-cadlab)
     - [Backing up CADLAB](#backing-up-cadlab)
     - [Restoring CADLAB](#restoring-cadlab)
   - [CADLAB command-line utility](#cadlab-command-line-utility)
