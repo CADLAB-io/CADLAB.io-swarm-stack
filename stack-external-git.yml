@@ -12,7 +12,7 @@ services:
         condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/cadlab-sh:1.20.3
+    image: docker.cadlab.io/cadlab-sh:1.20.4
     networks:
       cadlab_net: {}
     secrets:
@@ -21,7 +21,7 @@ services:
     - ./configs:/etc/cadlab:rw
     - certs:/etc/ssl/cadlab:rw
     - ./backups:/var/cadlab/backups:rw
-    - ./logs/cadlab:/var/log:rw
+    - ./logs/cadlab:/var/log/cadlab:rw
     - /var/run/docker.sock:/var/run/docker.sock:rw
     - source:/var/www:rw
   mail-server:
