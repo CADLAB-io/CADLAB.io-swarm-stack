@@ -14,7 +14,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/cadlab-sh:1.20.4
+    image: docker.cadlab.io/cadlab-sh:1.20.5
     networks:
       cadlab_net: {}
     secrets:
@@ -26,7 +26,6 @@ services:
     - git-backups:/var/git-backups:rw
     - git-configs:/var/git-configs:rw
     - ./logs/cadlab:/var/log/cadlab:rw
-    - /var/run/docker.sock:/var/run/docker.sock:rw
     - source:/var/www:rw
   git-server:
     deploy:
@@ -35,7 +34,7 @@ services:
         condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/git-server:13.3.6-1.4
+    image: docker.cadlab.io/git-server:13.3.6-1.5
     networks:
       cadlab_net: {}
     volumes:
@@ -52,7 +51,7 @@ services:
         condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/mail-server:1.0.5
+    image: docker.cadlab.io/mail-server:1.0.6
     networks:
       cadlab_net: {}
     volumes:
@@ -67,7 +66,7 @@ services:
     environment:
       MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/mysql-sh:1.0.18
+    image: docker.cadlab.io/mysql-sh:1.0.19
     networks:
       cadlab_net: {}
     secrets:
@@ -84,7 +83,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/nginx-sh:1.0.10
+    image: docker.cadlab.io/nginx-sh:1.0.11
     networks:
       cadlab_net: {}
     ports:
