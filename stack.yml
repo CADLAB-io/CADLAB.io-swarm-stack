@@ -83,7 +83,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/nginx-sh:1.0.11
+    image: docker.cadlab.io/nginx-sh:1.0.12
     networks:
       cadlab_net: {}
     ports:
