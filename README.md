@@ -592,8 +592,8 @@ Go to your group settings:
 
 ![GitLab Group Application](documentation/images/gitlab-group-application.png "GitLab Group Application")
 
-Then, create a new application following the instructions in the [system level application][#system-level-application] section.
+Then, create a new application following the instructions in the [system level application](#system-level-application) section.
 
 ### Cloud GitLab integration
 
-Using the Group level application option, you can also integrate your self-hosted CADLAB with your gitlab.com groups. Follow the instructions in the [group level application] section.
+Using the Group level application option, you can also integrate your self-hosted CADLAB with your gitlab.com groups. Follow the instructions in the [group level application](#group-level-application) section.
