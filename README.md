@@ -14,6 +14,7 @@ For support inquiries, please contact info@cadlab.io.
     - [System requirements](#system-requirements)
     - [Install Docker](#install-docker)
     - [Move sshd to another port (stand-alone installation only)](#move-sshd-to-another-port-stand-alone-installation-only)
+    - [SELinux Policies](#selinux-policies)
     - [Login into docker.cadlab.io](#login-into-dockercadlabio)
     - [Add DNS records](#add-dns-records)
     - [Install git](#install-git)
@@ -111,7 +112,12 @@ Include /etc/ssh/sshd_config.d/*.conf
 #ListenAddress ::
 ```
 
-Uncomment the line `#Port 22` by removing the pound sign `#` and change `22` to `2222`. Now restart your sshd service by executing the following command:
+Uncomment the line `#Port 22` by removing the pound sign `#` and change `22` to `2222`. 
+
+### SELinux Policies
+If you're using SELinux, it might be blocking SSHD from using non-standard ports. You can check this by running the command `semanage port -l | grep ssh`. If port `2222` is not listed, you can add it with the command `semanage port -a -t ssh_port_t -p tcp 2222`.
+
+Now restart your sshd service by executing the following command:
 
 ```bash
 service sshd restart
