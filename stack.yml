@@ -14,7 +14,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/self-hosted/cadlab:1.21.5
+    image: docker.cadlab.io/self-hosted/cadlab:1.21.6
     networks:
       cadlab_net: {}
     secrets:
@@ -83,7 +83,7 @@ services:
         max_attempts: 3
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/self-hosted/nginx:1.0.14
+    image: docker.cadlab.io/self-hosted/nginx:1.0.15
     networks:
       cadlab_net: {}
     ports:
