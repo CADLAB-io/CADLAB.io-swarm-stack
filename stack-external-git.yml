@@ -12,7 +12,7 @@ services:
         condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/self-hosted/cadlab:1.21.6
+    image: docker.cadlab.io/self-hosted/cadlab:1.21.7
     networks:
       cadlab_net: {}
     secrets:
@@ -60,7 +60,7 @@ services:
         condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/self-hosted/nginx:1.0.15
+    image: docker.cadlab.io/self-hosted/nginx:1.0.16
     networks:
       cadlab_net: {}
     ports:
