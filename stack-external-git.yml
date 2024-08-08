@@ -12,13 +12,14 @@ services:
         condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/self-hosted/cadlab:1.21.7
+    image: docker.cadlab.io/self-hosted/cadlab:1.21.8
     networks:
       cadlab_net: {}
     secrets:
     - source: mysql_root_pass
     volumes:
     - ./configs:/etc/cadlab:rw
+    - ./certificates:/certificates:rw
     - certs:/etc/ssl/cadlab:rw
     - ./backups:/var/cadlab/backups:rw
     - ./logs/cadlab:/var/log/cadlab:rw
@@ -60,7 +61,7 @@ services:
         condition: any
         delay: 5s
         max_attempts: 3
-    image: docker.cadlab.io/self-hosted/nginx:1.0.16
+    image: docker.cadlab.io/self-hosted/nginx:1.0.17
     networks:
       cadlab_net: {}
     ports:
