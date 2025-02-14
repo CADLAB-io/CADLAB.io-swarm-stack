@@ -44,15 +44,15 @@ For support inquiries, please visit https://cadlab.io/contact-us or email us at 
     - [Getting the DKIM configuration](#getting-the-dkim-configuration)
   - [Integrating CADLAB with external Git provider](#integrating-cadlab-with-external-git-provider)
     - [GitLab Integration](#gitlab-integration)
-  - [Self-hosted GitLab](#self-hosted-gitlab)
-    - [System-Level Application (Requires Admin Access)](#system-level-application-requires-admin-access)
-    - [Group-Level Application (No Admin Access Required)](#group-level-application-no-admin-access-required)
-  - [Cloud GitLab (gitlab.com)](#cloud-gitlab-gitlabcom)
+      - [Self-hosted GitLab](#self-hosted-gitlab)
+        - [System-Level Application (Requires Admin Access)](#system-level-application-requires-admin-access)
+        - [Group-Level Application (No Admin Access Required)](#group-level-application-no-admin-access-required)
+      - [Cloud GitLab (gitlab.com)](#cloud-gitlab-gitlabcom)
     - [GitHub Integration](#github-integration)
-  - [Creating a GitHub App](#creating-a-github-app)
+      - [Creating a GitHub App](#creating-a-github-app)
     - [BitBucket Integration](#bitbucket-integration)
-  - [BitBucket Cloud (bitbucket.org)](#bitbucket-cloud-bitbucketorg)
-  - [BitBucket Data Center](#bitbucket-data-center)
+      - [BitBucket Cloud (bitbucket.org)](#bitbucket-cloud-bitbucketorg)
+      - [BitBucket Data Center](#bitbucket-data-center)
   - [Links](#links)
 
 
@@ -647,11 +647,11 @@ If you selected **"GitLab Self-hosted"** or **"GitLab Cloud (gitlab.com)"** in t
 
 ---
 
-## Self-hosted GitLab
+#### Self-hosted GitLab
 
 To connect CADLAB with your **self-hosted GitLab**, you need to create an application in GitLab. There are two ways to do this:
 
-### System-Level Application (Requires Admin Access)
+##### System-Level Application (Requires Admin Access)
 
 You can integrate CADLAB with GitLab at the **system level**, which requires **admin permissions**.
 
@@ -689,7 +689,7 @@ You can integrate CADLAB with GitLab at the **system level**, which requires **a
 
 ---
 
-### Group-Level Application (No Admin Access Required)
+##### Group-Level Application (No Admin Access Required)
 
 Alternatively, you can integrate CADLAB at the **group level**, which **does not** require admin permissions.
 
@@ -703,7 +703,7 @@ Alternatively, you can integrate CADLAB at the **group level**, which **does not
 
 ---
 
-## Cloud GitLab (gitlab.com)
+#### Cloud GitLab (gitlab.com)
 
 If you selected **"GitLab Cloud (gitlab.com)"**, you should create an application at the **group level**, following the steps in the [Group-Level Application](#group-level-application) section.
 
@@ -718,7 +718,7 @@ The setup process for both **GitHub Enterprise** and **GitHub Cloud** is the sam
 
 ---
 
-## Creating a GitHub App
+#### Creating a GitHub App
 
 You can create a **GitHub App** for either a **user** or an **organization** profile.
 
@@ -795,7 +795,7 @@ To integrate CADLAB with either **BitBucket Cloud (bitbucket.org)** or a **self-
 
 ---
 
-## BitBucket Cloud (bitbucket.org)
+#### BitBucket Cloud (bitbucket.org)
 
 1. In the first step of the CADLAB integration, select **"BitBucket Cloud (bitbucket.org)"** and proceed to the next step.
 
@@ -832,7 +832,7 @@ To integrate CADLAB with either **BitBucket Cloud (bitbucket.org)** or a **self-
 
 ---
 
-## BitBucket Data Center
+#### BitBucket Data Center
 
 CADLAB integrates with BitBucket Data Center using OAuth. This requires creating an **Application Link** in the BitBucket admin panel.
 
