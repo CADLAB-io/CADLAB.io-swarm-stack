@@ -1,1 +1,1 @@
-This folder contains application and system logs.
+This folder contains CADLAB application and system logs.

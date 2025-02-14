@@ -1,1 +1,1 @@
-CADLAB backups are stored here.
+CADLAB backups are stored here. See [Backup \& restore CADLAB](/README.md#backup--restore-cadlab) for more info.

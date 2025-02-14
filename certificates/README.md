@@ -1,1 +1,1 @@
-Use this folder to upload custom SSL/TLS certificates to CADLAB.
+Use this folder to upload custom SSL/TLS certificates to CADLAB. See [SSL configs](/README.md#ssl_tls_support) for more info.

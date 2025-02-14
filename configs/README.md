@@ -1,1 +1,1 @@
-This folder contains CADLAB configuration file and a license key.
+This folder contains CADLAB configuration file and a license key. See [Configure CADLAB](/README.md#configure-cadlab) for more info

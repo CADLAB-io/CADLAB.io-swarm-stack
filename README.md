@@ -557,7 +557,7 @@ Then, perform the same `docker stack deploy` command we've already covered in th
 ## Backup & restore CADLAB
 
 ### Backing up CADLAB
-When you configure CADLAB, you can set the `automatic_backups` option in the `cadlab.json` file to make CADLAB perform backups on a regular basis. Read about this setting [here](#automatic_backups). CADLAB database, files, and git data (for stand-alone installation) will be automatically backed up and stored in the `/var/cadlab/backups` directory. CADLAB will store 10 of the most recent backup files. Backups are named using the following format `[current_timestamp]-yyyy-mm-dd_cadlab.tar.gz`.
+When you configure CADLAB, you can set the `automatic_backups` option in the `cadlab.json` file to make CADLAB perform backups on a regular basis. Read about this setting [here](#backups). CADLAB database, files, and git data (for stand-alone installation) will be automatically backed up and stored in the `/var/cadlab/backups` directory. CADLAB will store 10 of the most recent backup files. Backups are named using the following format `[current_timestamp]-yyyy-mm-dd_cadlab.tar.gz`.
 
 You can also perform backups manually using the CADLAB command-line utility. In order to do this, we need to execute a command in the `cadlab` container. 
 
