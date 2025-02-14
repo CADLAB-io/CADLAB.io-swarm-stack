@@ -476,7 +476,7 @@ The healthy application state is when all services are running with `1/1` in the
 ## Troubleshooting
 
 ### Checking container health
-If not all of your services are running properly, you will see that in the output of the `docker stack ps cadlab` command or `docker service ls` command. Usually, a service won't start because of an incorrect `cadlab.json` file. For example, if you made a mistake in the `automatic_backups` setting, the output of the `ps` command would look like this:
+If not all of your services are running properly, you will see that in the output of the `docker stack ps cadlab` command or `docker service ls` command. Usually, a service won't start because of an incorrect `cadlab.json` file. For example, if you made a mistake in the `backups` setting, the output of the `ps` command would look like this:
 
 ![docker stack ps cadlab - failed service](documentation/images/docker-stack-ps-failed.png "Docker stack ps command output")
 
@@ -498,7 +498,7 @@ Below is the log output for the failed cadlab container:
 
 ![docker service logs](documentation/images/docker-service-logs.png "Docker service logs command output")
 
-We can see that the `automatic_backups` setting was incorrectly configured in the cadlab.json file.
+We can see that the `backups` setting was incorrectly configured in the cadlab.json file.
 
 After fixing the mistake in the cadlab.json file, you need to restart your failed service. First, you need to delete the failed service(s), those with `0/0` replicas, by executing the following command:
 
@@ -557,7 +557,7 @@ Then, perform the same `docker stack deploy` command we've already covered in th
 ## Backup & restore CADLAB
 
 ### Backing up CADLAB
-When you configure CADLAB, you can set the `automatic_backups` option in the `cadlab.json` file to make CADLAB perform backups on a regular basis. Read about this setting [here](#backups). CADLAB database, files, and git data (for stand-alone installation) will be automatically backed up and stored in the `/var/cadlab/backups` directory. CADLAB will store 10 of the most recent backup files. Backups are named using the following format `[current_timestamp]-yyyy-mm-dd_cadlab.tar.gz`.
+When you configure CADLAB, you can set the `backups` option in the `cadlab.json` file to make CADLAB perform backups on a regular basis. Read about this setting [here](#backups). CADLAB database, files, and git data (for stand-alone installation) will be automatically backed up and stored in the `/var/cadlab/backups` directory. CADLAB will store 10 of the most recent backup files. Backups are named using the following format `[current_timestamp]-yyyy-mm-dd_cadlab.tar.gz`.
 
 You can also perform backups manually using the CADLAB command-line utility. In order to do this, we need to execute a command in the `cadlab` container. 
 
