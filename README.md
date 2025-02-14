@@ -1,9 +1,10 @@
 # Docker swarm stack for a self-hosted installation of CADLAB.io
 
-This project provides a compose file and directory structure to run a self-hosted version of [CADLAB.io](https://cadlab.io).
+This project provides Docker compose files and directory structure to run a self-hosted version of [CADLAB.io](https://cadlab.io).
 
 ## Support
-For support inquiries, please contact info@cadlab.io.
+
+For support inquiries, please visit https://cadlab.io/contact-us or email us at info@cadlab.io.
 
 **Table of contents**
 
@@ -23,10 +24,11 @@ For support inquiries, please contact info@cadlab.io.
     - [Create secrets](#create-secrets)
     - [Configure CADLAB](#configure-cadlab)
       - [hostname](#hostname)
-      - [automatic\_backups](#automatic_backups)
+      - [backups](#backups)
       - [ssl\_tls\_support](#ssl_tls_support)
-      - [smtp](#smtp)
+      - [mail](#mail)
       - [reverse\_proxy](#reverse_proxy)
+      - [Render memory limit](#render-memory-limit)
     - [Add license file](#add-license-file)
     - [Start CADLAB swarm](#start-cadlab-swarm)
     - [Checking services status](#checking-services-status)
@@ -39,10 +41,19 @@ For support inquiries, please contact info@cadlab.io.
     - [Backing up CADLAB](#backing-up-cadlab)
     - [Restoring CADLAB](#restoring-cadlab)
   - [CADLAB command-line utility](#cadlab-command-line-utility)
-  - [Integrating with GitLab](#integrating-with-gitlab)
-    - [System-level application](#system-level-application)
-    - [Group-level application](#group-level-application)
-    - [Cloud GitLab integration](#cloud-gitlab-integration)
+    - [Getting the DKIM configuration](#getting-the-dkim-configuration)
+  - [Integrating CADLAB with external Git provider](#integrating-cadlab-with-external-git-provider)
+    - [GitLab Integration](#gitlab-integration)
+  - [Self-hosted GitLab](#self-hosted-gitlab)
+    - [System-Level Application (Requires Admin Access)](#system-level-application-requires-admin-access)
+    - [Group-Level Application (No Admin Access Required)](#group-level-application-no-admin-access-required)
+  - [Cloud GitLab (gitlab.com)](#cloud-gitlab-gitlabcom)
+    - [GitHub Integration](#github-integration)
+  - [Creating a GitHub App](#creating-a-github-app)
+    - [BitBucket Integration](#bitbucket-integration)
+  - [BitBucket Cloud (bitbucket.org)](#bitbucket-cloud-bitbucketorg)
+  - [BitBucket Data Center](#bitbucket-data-center)
+  - [Links](#links)
 
 
 
@@ -61,8 +72,8 @@ If you're interested in running a self-hosted CADLAB instance, please contact ou
 You can run CADLAB on a VPS or dedicated server. Below are recommended system requirements for a stand-alone installation of CADLAB and integration with GitLab.
 
 **Stand-alone CADLAB installation:**
-- 2-4+ CPU cores
-- 6-8+ GB of RAM
+- 4+ CPU cores
+- 8+ GB of RAM
 - 40+ GB of storage
 - Ubuntu/Debian/CentOS/Fedora operating system
 
@@ -163,6 +174,14 @@ v=spf1 ip4:50.201.69.200 -all
 
 **Important:** Keep in mind to replace *50.201.69.200* with your IP address. If your domain already has an SPF record, you should only include the 'ip4:50.201.69.200' part to add your new server.
 
+DMARC and DKIM
+
+To improve email deliverability, you may need DMARC and DKIM records. CADLAB is shipped with a DKIM signature functionality, that you can enable it using the [mail.dkim](#mail) setting and then use the command line utility to [get DNS config settings](#getting-the-dkim-configuration). To create a DKIM record you need to add a TXT record in your DNS manager. Below is an example of such record configured on GoDaddy:
+
+![DKIM-Record](/documentation/images/DKIM-DNS.png "DKIM record configuration")
+
+To harden the email configuration, we also recommend configuring a DMARC record using the instructions form your DNS provider, or one of the guides available online.
+
 ### Install git
 
 This is an optional step but makes the CADLAB update process more convenient. You can follow the official git installation instructions [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
@@ -248,23 +267,26 @@ A fully qualified domain name that you plan to use to access CADLAB.
 }
 ```
 
-#### automatic_backups
-This setting controls automatic CADLAB backups. 
-
-Possible values: 
-- `no`
-- `daily`
-- `weekly`
-- `monthly`
+#### backups
+This setting controls CADLAB backups. 
 
 ```javascript
 {
-  "hostname": "cadlab.example.com",
-  "automatic_backups": "daily"
+  ...
+  "backups": {
+    "enabled": true,
+    "schedule": "daily"
+  }
+  ...
 }
 ```
 
-The default value is `no` if this setting is not specified in the cadlab.json file.
+Below is the list of all object properties with available values:
+- **enabled** - Determines whether automatic backups are enabled. Default: false.
+- **schedule** - Defines the backup schedule. Possible values: `daily`, `weekly`, `monthly`, `custom`.
+- **schedule_cron** - Required if schedule is set to `custom`. Specifies the schedule using the standard [cron format](https://en.wikipedia.org/wiki/Cron).
+
+By default backups are not enabled, set the `enabled` property to `true` to enable backups.
 
 Backups are stored in the `/var/cadlab/backups` directory located in the swarm project. CADLAB will automatically rotate backups and keep 10 most recent backups.
 
@@ -291,31 +313,43 @@ Below is the list of all object properties with available values:
 - **custom_ca_key** - custom Certificate Authority (CA) key. You should specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority. In this case you also need to specify `custom_ca_pem`. The value of this property should be the filename of a custom CA placed in the `certificates` directory.
 - **custom_ca_pem** - custom Certificate Authority (CA) cert file in pem format. You should specify this property if you want CADLAB to generate `self-signed` keys using your own Certificate Authority. In this case you should also specify `custom_ca_key`. The value of this property should be the filename of a custom CA certificate placed in the `certificates` directory. You should also specify this property if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
 
-#### smtp
-By default, CADLAB uses a built-in send-only mail server. For this mail server to deliver emails successfully, you need to add an SPF record as described in the [Add DNS records](#add-dns-records) section. If you prefer using your own mail server, you can provide SMTP connection info in this section. `smtp` is an object of the following structure:
+#### mail
+By default, CADLAB uses a built-in send-only mail server. For this mail server to deliver emails successfully, you need to add an SPF and optionally DMARC, and DKIM records as described in the [Add DNS records](#add-dns-records) section. If you prefer using your own mail server, you can provide SMTP connection info in this section. `mail` is an object of the following structure:
 
 ```javascript
 {
     ...
-    "smtp": {
-        "host": "example-mail-server.com",
-        "port": 25,
-        "username": "account_name",
-        "password": "account_password",
+    "mail": {
+      "enabled": true,
+      "smtp": {
+          "host": "example-mail-server.com",
+          "port": 25,
+          "username": "account_name",
+          "password": "account_password",
+      },
+      "dkim": {
+        "enabled": true,
+        "domain_key": "mail"
+      }
     }
     ...
 }
 ```
 
 Below is the list of all object properties with available values:
-- **host** - hostname of your mail server.
-- **port** - SMTP port. It depends on your mail server setup, but usually, 587 if an encrypted protocol is used, or 25 as the default SMTP port.
-- **protocol** - (optional) encryption protocol. Skip this setting if your server doesn't require a secure connection. Possible values are:
+- **enabled** - specifies whether emails should be sent. Default: true.
+- **smtp.host** - hostname of your mail server.
+- **smtp.port** - SMTP port. It depends on your mail server setup, but usually, 587 if an encrypted protocol is used, or 25 as the default SMTP port.
+- **smtp.protocol** - (optional) encryption protocol. Skip this setting if your server doesn't require a secure connection. Possible values are:
   - `tls`
   - `ssl`
-- **from** - email address to be used as a sender.
-- **username** - username of the email account you are going to use to send emails through. This setting is required only if your SMTP server requires authentication.
-- **password** - account password. This setting is required only if your SMTP server requires authentication.
+- **smtp.from** - email address to be used as a sender.
+- **smtp.username** - username of the email account you are going to use to send emails through. This setting is required only if your SMTP server requires authentication.
+- **smtp.password** - account password. This setting is required only if your SMTP server requires authentication.
+- **dkim.enabled** - specifies whether emails should be signed with DKIM. Default: false. **Important:** This setting is not used if `smtp` is configured. When DKIM is enabled, CADLAB will generate a signature key, that needs to be used when configuring DNS. Use the command line tool to get the DKIM configuration record described [here](#getting-the-dkim-configuration).
+- **dkim.domain_key** - domain_key to be used for signature. The DKIM DNS record should be created with this domain_key. Default: mail.
+
+**Note:** Use the command line utility to [get the DKIM record configs](#getting-the-dkim-configuration).
 
 #### reverse_proxy
 CADLAB is deployed with its own Nginx container to handle incoming traffic for ports `80`, `443`, and, optionally, `22`. If you install CADLAB on a server with other software running on the same ports, you may want to use a reverse proxy to handle connections. This will require modifying `stack.yml` or `stack-external-git.yml` file, depending on whether you deploy CADLAB with git or connect it to GitLab.
@@ -356,6 +390,22 @@ In addition to configuring your proxy and changing the stack file, you also need
 Below is the list of all object properties with available values:
 - **enabled** - `true` or `false` - tells CADLAB if it's behind a reverse proxy.
 - **protocol** - `http` or `https` - tells CADLAB which protocol is used to access CADLAB in the reverse proxy so that CADLAB can build correct links to pages and resource files like CSS and JS.
+
+#### Render memory limit
+
+You can specify the amount of memory CADLAB uses to render a PCB design or schematic. The default value is `1G`, which is sufficient for most designs. However, if CADLAB reports that it couldn't render a file due to memory limitations, you can increase this value.
+
+```javascript
+{
+    ...
+    "render": {
+        "memory_limit": '2G',
+    }
+    ...
+}
+```
+
+Possible values: a number followed by `M` (megabytes) or `G` (gigabytes)."
 
 ### Add license file
 
@@ -442,7 +492,7 @@ To inspect logs for a service, you need to perform the following command:
 docker service logs cadlab_cadlab
 ```
 
-The last argument in this command is the service name, which you can find from the `docker service ls` command. You can also add the `-f` flag to the logs command to view logs in real-time like so `docker service logs -f cadlab_cadlab` and exit logs by pressing `ctlr+c`.
+The last argument in this command is the service name, which you can find from the `docker service ls` command. You can also add the `-f` flag to the logs command to view logs in real-time like so `docker service logs -f cadlab_cadlab` and exit logs by pressing `ctrl+c`.
 
 Below is the log output for the failed cadlab container:
 
@@ -550,56 +600,274 @@ To execute one of the commands, for example, `reconfigure`, run the following Do
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab reconfigure
 ```
 
-## Integrating with GitLab
+### Getting the DKIM configuration
+If DKIM is enabled in the [mail settings](#mail), you can get the DKIM configuration record using the following command:
 
-If you choose to install CADLAB with an external git back-end, for example, GitLab, you need to use the `stack-external-git.yml` file to [start the swarm](#start-cadlab-swarm). After the CADLAB application successfully starts, you need to integrate it with your self-hosted GitLab installation.
+```bash
+docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab mail get-dkim
+```
+
+The output of the of the command will be similar to the below example:
+
+```bash
+mail._domainkey	IN	TXT	( "v=DKIM1; k=rsa; "
+	  "p=SDFfMA0GCSqGSsdV3DQEBAQUASDF4CBiQKDgQC1smkBqNaahqvkJDY5OI/TcP8XSd/6obLgpO0qsduB4cHv8qbXDMSxx/jWSizytqE/g/p9KYN+hSbCdfa5WKRQqT8W8asdfVdcWr90igD5CxLQbKwr0Ju/Kp2C9/D8yyz9RPDJne/M1e5BVeND0uXnq8CV8bTMWsd23sDDG8rNBwIDAQAB" )  ; ----- DKIM key mail for example.com
+```
+
+To create a DKIM DNS record, use the domain key as the record name:
+```bash
+mail._domainkey
+```
+Use the key - the part after `p=` as the record value:
+
+```bash
+SDFfMA0GCSqGSsdV3DQEBAQUASDF4CBiQKDgQC1smkBqNaahqvkJDY5OI/TcP8XSd/6obLgpO0qsduB4cHv8qbXDMSxx/jWSizytqE/g/p9KYN+hSbCdfa5WKRQqT8W8asdfVdcWr90igD5CxLQbKwr0Ju/Kp2C9/D8yyz9RPDJne/M1e5BVeND0uXnq8CV8bTMWsd23sDDG8rNBwIDAQAB
+```
+
+Example using GoDaddy DNS manager:
+![DKIM Record](/documentation/images/DKIM-DNS.png "DKIM record")
+
+## Integrating CADLAB with external Git provider
+
+If you choose to install CADLAB with an external git back-end, for example, GitLab, GitHub, or BitBucket, you need to use the `stack-external-git.yml` file to [start the swarm](#start-cadlab-swarm). After the CADLAB application successfully starts, you need to integrate it with your Git provider.
 
 Open the URL you specified in the `hostname` [here](#hostname) in your browser, and you should see a CADLAB welcome screen:
 
-![CADLAB.io Welcome screen](documentation/images/cadlab-gitlab-url.png "CADLAB Welcome screen")
+![CADLAB.io Welcome screen](documentation/images/cadlab-welcome-screen.png "CADLAB Welcome screen")
 
-You need to enter the URL of your GitLab installation on this screen so that CADLAB can connect to GitLab's API. **Please note**: if your GitLab installation is deployed to a private network, CADLAB also needs to be deployed to the same network so that it's able to connect to GitLab's API.
+Next, choose your Git Provider, and enter the URL of your Git provider in the URL field. **Please note**: if your Git provider is deployed to a private network, CADLAB also needs to be deployed to the same network so that it's able to connect to the Git API.
 
-Submit the form and proceed to the next step:
+### GitLab Integration
 
-![CADLAB.io create integration](documentation/images/cadlab-gitlab-callback-url.png "Integration creation step")
+If you selected **"GitLab Self-hosted"** or **"GitLab Cloud (gitlab.com)"** in the first step and CADLAB successfully connected to your GitLab, the integration settings form will appear as shown below.
 
-If CADLAB was able to connect to your GitLab, you should see the integration settings form like in the screenshot above. Copy the Callback URL from the form and proceed to create an application in GitLab.
+- **Copy the Callback URL** from the form and proceed to create an application in GitLab.
 
-### System-level application
+  ![CADLAB.io create integration](documentation/images/cadlab-gitlab-callback-url.png "Integration creation step")
 
-You can integrate CADLAB with GitLab on the system level. This will require admin permissions for your user in GitLab.
+---
 
-In your GitLab, go to Admin area (1), then Applications (2) in the left-hand side navigation, and click "New Application". 
+## Self-hosted GitLab
 
-![GitLab New Application](documentation/images/gitlab-new-applicatoin.png "GitLab New Application")
+To connect CADLAB with your **self-hosted GitLab**, you need to create an application in GitLab. There are two ways to do this:
 
-On the "New Application" page, provide the application name (1), paste the CADLAB callback URL (2), tick the "api" checkbox (3), and submit the form.
+### System-Level Application (Requires Admin Access)
 
-GitLab will create an application and generate Application ID and Secret key: 
+You can integrate CADLAB with GitLab at the **system level**, which requires **admin permissions**.
 
-![GitLab Application](documentation/images/gitlab-applicatoin-id.png "GitLab Application")
+1. **Navigate to Applications**:
+   - Open **GitLab Admin Area** (1).
+   - In the left-hand navigation, select **"Applications"** (2).
+   - Click **"New Application"**.
 
-Copy them over to the corresponding fields in the CADLAB integration form:
+     ![GitLab New Application](documentation/images/gitlab-new-applicatoin.png "GitLab New Application")
 
-![GitLab Application ID and Secret Key](documentation/images/cadlab-gitlab-secret-and-api-key.png "GitLab Application ID and Secret Key")
+2. **Create the Application**:
+   - **Application Name**: Enter a name (e.g., **"CADLAB"**) (1).
+   - **Redirect URI**: Paste the **CADLAB Callback URL** (2).
+   - **Permissions**: Check the **"api"** checkbox (3).
+   - Click **"Submit"**.
 
-After clicking the create button, you will be redirected to the sign-in with GitLab screen. 
+3. **Copy the Application Credentials**:
+   - GitLab will generate an **Application ID** and **Secret Key**.
 
-![GitLab sign in](documentation/images/cadlab-gitlab-sign-in.png "GitLab Application ID and Secret Key")
+     ![GitLab Application](documentation/images/gitlab-applicatoin-id.png "GitLab Application")
 
-The first user that signs in during the initial setup will automatically be assigned an organization Admin role.
+4. **Enter Credentials in CADLAB**:
+   - Copy the **Application ID** and **Secret Key** into the CADLAB integration form.
 
-### Group-level application
+     ![GitLab Application ID and Secret Key](documentation/images/cadlab-gitlab-secret-and-api-key.png "GitLab Application ID and Secret Key")
 
-Alternatively, you can create an integration on the group level. This option doesn't require Admin permissions in GitLab.
+5. **Complete the Setup**:
+   - Click **"Create"** in CADLAB.
+   - You will be redirected to the **GitLab sign-in** screen.
 
-Go to your group settings:
+     ![GitLab sign in](documentation/images/cadlab-gitlab-sign-in.png "GitLab Sign-in")
 
-![GitLab Group Application](documentation/images/gitlab-group-application.png "GitLab Group Application")
+6. **Admin Role Assignment**:
+   - The **first user** that signs in during the initial setup will be **automatically assigned an Admin role**.
 
-Then, create a new application following the instructions in the [system level application](#system-level-application) section.
+---
 
-### Cloud GitLab integration
+### Group-Level Application (No Admin Access Required)
 
-Using the Group level application option, you can also integrate your self-hosted CADLAB with your gitlab.com groups. Follow the instructions in the [group level application](#group-level-application) section.
+Alternatively, you can integrate CADLAB at the **group level**, which **does not** require admin permissions.
+
+1. **Navigate to Group Settings**:
+   - Open **GitLab Group Settings**.
+
+     ![GitLab Group Application](documentation/images/gitlab-group-application.png "GitLab Group Application")
+
+2. **Create a New Application**:
+   - Follow the same steps as in the [System-Level Application](#system-level-application) section.
+
+---
+
+## Cloud GitLab (gitlab.com)
+
+If you selected **"GitLab Cloud (gitlab.com)"**, you should create an application at the **group level**, following the steps in the [Group-Level Application](#group-level-application) section.
+
+
+### GitHub Integration
+
+The setup process for both **GitHub Enterprise** and **GitHub Cloud** is the same. After completing the first step, the integration settings form will appear, as shown in the screenshot below.  
+
+- **Copy the Callback URL** from the form and proceed to create a GitHub application.
+
+  ![GitHub Integration](/documentation/images/cadlab-github-integration.png "GitHub Integration")
+
+---
+
+## Creating a GitHub App
+
+You can create a **GitHub App** for either a **user** or an **organization** profile.
+
+1. **Navigate to Developer Settings**:
+   - Open **Settings** in your preferred account or organization.
+   - Select **"GitHub Apps"** under the **Developer settings** menu.
+
+     ![GitHub Developer settings](/documentation/images/github-developer-settings.png "GitHub Developer Settings")
+
+2. **Create a new GitHub App**:
+   - Click **"New GitHub App"**.
+   - **App Name**: Choose a name (e.g., **"CADLAB"**).
+   - **Homepage URL**: Enter the URL of your **CADLAB installation**.
+   - **Callback URL**: Copy and paste the **Callback URL** from the CADLAB integration form.
+
+     ![GitHub new App](/documentation/images/github-new-app.png "GitHub New App")
+
+3. **Configure the Webhook**:
+   - Copy the **Webhook URL** from CADLAB.
+   - Paste it into the **"Webhook URL"** field.
+
+     ![GitHub Webhook](/documentation/images/github-app-webhook.png "GitHub Webhook")
+
+4. **Set Permissions**:
+   - **Repository permissions**:
+     - **Access: Read & Write** for:
+       - Contents
+       - Pull Requests
+       - Webhooks
+   - **Account permissions**:
+     - **Access: Read-only** for:
+       - Email addresses
+
+     ![GitHub App permissions](/documentation/images/github-app-permissions.png "GitHub App Permissions")
+
+5. **Subscribe to Events**:
+   - Check the following event subscriptions:
+     - **Create**
+     - **Delete**
+     - **Push**
+     - **Repository**
+
+     ![GitHub App events](/documentation/images/github-app-events.png "GitHub App Events")
+
+6. **Choose Installation Scope**:
+   - **Any account**: Allows multiple organizations or user accounts to connect CADLAB.
+   - **Only on this account**: Restricts the app to the current account.
+
+7. **Create the GitHub App**:
+   - Click **"Create GitHub App"** to proceed.
+
+8. **Copy the App Credentials**:
+   - Copy the following values into the CADLAB integration form:
+     - **Client ID**
+     - **Public URL**
+     - **Client Secret**
+   - If needed, click **"Generate a new client secret"** to obtain a new secret.
+
+     ![GitHub App secret](/documentation/images/github-app-secret.png "GitHub App Secret")
+
+9. **Finalize the Integration**:
+   - Paste the copied values into the **CADLAB integration form**.
+   - Complete the setup.
+
+     ![CADLAB GitHub App connection](/documentation/images/cadlab-github-secret.png "CADLAB GitHub App Connection")
+
+10. **Sign in with GitHub**:
+    - After completing the integration, you can **sign in to the CADLAB dashboard** using your **GitHub account**.
+    - The **first user** to sign in will be **automatically assigned the Admin role**.
+
+### BitBucket Integration
+
+To integrate CADLAB with either **BitBucket Cloud (bitbucket.org)** or a **self-hosted BitBucket Data Center**, you need to create an OAuth consumer on BitBucket. Follow the respective instructions below.
+
+---
+
+## BitBucket Cloud (bitbucket.org)
+
+1. In the first step of the CADLAB integration, select **"BitBucket Cloud (bitbucket.org)"** and proceed to the next step.
+
+   ![CADLAB BitBucket integration](/documentation/images/cadlab-bitbucket-integration.png "CADLAB BitBucket integration")
+
+2. Create an OAuth consumer in BitBucket:
+   - Navigate to **Workspace settings**, as shown in the screenshot below.
+
+     ![BitBucket workspace settings](/documentation/images/bitbucket-workspace-settings.png "BitBucket workspace settings")
+
+   - In the settings, go to **OAuth consumers** and click **"Add consumer"**.
+
+     ![BitBucket OAuth consumers](/documentation/images/bitbucket-oauth-consumer.png "BitBucket OAuth consumers")
+
+3. Fill in the required fields:
+   - **Name**: Enter a name for the consumer.
+   - **Callback URL**: Copy and paste the **CADLAB callback URL** from the integration form.
+
+     ![BitBucket consumer create](/documentation/images/bitbucket-consumer-create.png "BitBucket consumer create")
+
+4. Configure permissions:
+   - **Read**: Account, Workspace membership, Project
+   - **Write**: Pull requests, Webhooks
+   - **Admin**: Repositories
+
+     ![BitBucket consumer permissions](/documentation/images/bitbucket-oauth-consumer-permissions.png "BitBucket consumer permissions")
+
+5. Save the OAuth consumer and copy the **Consumer Key** and **Secret** into the CADLAB integration form.
+
+   ![BitBucket consumer secret](/documentation/images/bitbucket-consumer-key-secret.png "BitBucket consumer secret")
+
+6. Complete the integration in CADLAB. You will be prompted to **log in with your BitBucket account**.  
+   - The first user to sign in will be **automatically assigned the Admin role**.
+
+---
+
+## BitBucket Data Center
+
+CADLAB integrates with BitBucket Data Center using OAuth. This requires creating an **Application Link** in the BitBucket admin panel.
+
+1. In the first step of the CADLAB integration, select **"BitBucket Data Center"** and proceed.
+
+   ![BitBucket Data Center integration](/documentation/images/cadlab-bitbucket-dc-integration.png "BitBucket Data Center integration")
+
+2. Create an **Application Link** in BitBucket Data Center:
+   - Navigate to the **Admin panel**, then select **"Application links"**.
+
+     ![BitBucket Data Center admin panel](/documentation/images/bitbucket-dc-admin-panel.png "BitBucket Data Center admin panel")
+
+   - Click **"Create link"**, then:
+     - Set **Application type** to **External application**.
+     - Set **Direction** to **Incoming**.
+
+     ![BitBucket Data Center create link](/documentation/images/bitbucket-dc-create-app-link.png "BitBucket Data Center create link")
+
+3. Configure the Application Link:
+   - **Name**: Enter a name for the application.
+   - **Redirect URL**: Copy and paste the **CADLAB Callback URL** from the integration form.
+   - **Permissions**:
+     - **Admin**: Projects (this will also select Repositories)
+     - **Write**: Account
+
+     ![BitBucket Data Center app configure](/documentation/images/bitbucket-dc-app-link-create.png "BitBucket Data Center app configure")
+
+4. Save the application and proceed to the **Credentials** screen.
+   - Copy the **Client ID** and **Client Secret** into the CADLAB integration form.
+
+     ![BitBucket Data Center app credentials](/documentation/images/bitbucket-dc-app-secret.png "BitBucket Data Center app credentials")
+
+5. Complete the integration in CADLAB. You will be prompted to **log in with your BitBucket account**.  
+   - The first user to sign in will be **automatically assigned the Admin role**.
+
+## Links
+
+[CADLAB.io](https://cadlab.io), [Support](https://cadlab.io/contact-us), [Features](https://cadlab.io/features), [Pricing](https://cadlab.io/pricing), [Open source hardware projects](https://cadlab.io/projects)

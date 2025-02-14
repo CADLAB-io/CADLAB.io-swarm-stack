@@ -1,89 +1,169 @@
-networks:
-  cadlab_net: {}
-secrets:
-  mysql_root_pass:
-    external: true
-    name: mysql_root_pass
+version: '3.7'
 services:
   cadlab:
     deploy:
       mode: global
+      update_config:
+        parallelism: 1
+        delay: 5s
+        order: start-first
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
-    image: docker.cadlab.io/self-hosted/cadlab:1.21.8
+    image: docker.cadlab.io/self-hosted/cadlab:2.0.0
+    logging:
+      driver: json-file
+      options:
+        max-file: "5"
+        max-size: 5M
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     secrets:
-    - source: mysql_root_pass
+      - source: mysql_root_pass
+        target: /run/secrets/mysql_root_pass
     volumes:
-    - ./configs:/etc/cadlab:rw
-    - ./certificates:/certificates:rw
-    - certs:/etc/ssl/cadlab:rw
-    - ./backups:/var/cadlab/backups:rw
-    - ./logs/cadlab:/var/log/cadlab:rw
-    - source:/var/www:rw
+      - type: volume
+        source: source
+        target: /var/www
+        volume: {}
+      - type: volume
+        source: certs
+        target: /etc/ssl/cadlab
+        volume: {}
+      - type: bind
+        source: ./configs
+        target: /etc/cadlab
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./certificates
+        target: /certificates
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./backups
+        target: /var/cadlab/backups
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./logs/cadlab
+        target: /var/log/cadlab
+        bind:
+          create_host_path: true
   mail-server:
     deploy:
       mode: global
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
-    image: docker.cadlab.io/mail-server:1.0.8
+    image: docker.cadlab.io/mail-server:1.0.11
+    logging:
+      driver: json-file
+      options:
+        max-file: "5"
+        max-size: 5M
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     volumes:
-    - ./configs:/etc/cadlab:rw
+      - type: bind
+        source: ./configs
+        target: /etc/cadlab
+        bind:
+          create_host_path: true
+      - type: volume
+        source: mail-configs
+        target: /etc/cadlab-mail
+        volume: {}
   mysql:
     deploy:
       mode: global
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
     environment:
       MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/self-hosted/mysql:1.0.21
+    image: docker.cadlab.io/self-hosted/mysql:1.0.22
+    logging:
+      driver: json-file
+      options:
+        max-file: "5"
+        max-size: 5M
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     secrets:
-    - source: mysql_root_pass
+      - source: mysql_root_pass
+        target: /run/secrets/mysql_root_pass
     volumes:
-    - data:/var/lib/mysql:rw
-    - ./logs/mysql:/var/log/mysql:delegated
+      - type: volume
+        source: data
+        target: /var/lib/mysql
+        volume: {}
+      - type: bind
+        source: ./logs/mysql
+        target: /var/log/mysql
+        bind:
+          create_host_path: true
   nginx:
     deploy:
       mode: global
       restart_policy:
         condition: any
         delay: 5s
-        max_attempts: 3
-    image: docker.cadlab.io/self-hosted/nginx:1.0.17
+    image: docker.cadlab.io/self-hosted/nginx:1.0.18
+    logging:
+      driver: json-file
+      options:
+        max-file: "5"
+        max-size: 5M
     networks:
-      cadlab_net: {}
+      cadlab_net: null
     ports:
-    - mode: host
-      protocol: tcp
-      published: 80
-      target: 80
-    - mode: host
-      protocol: tcp
-      published: 443
-      target: 443
+      - mode: host
+        target: 80
+        published: 80
+        protocol: tcp
+      - mode: host
+        target: 443
+        published: 443
+        protocol: tcp
     volumes:
-    - ./certificates:/certificates:rw
-    - ./configs:/etc/cadlab:rw
-    - certs:/etc/ssl/cadlab:rw
-    - acme:/root/.acme.sh:rw
-    - ./logs/nginx:/var/log/nginx:delegated
-    - source:/var/www:rw
-version: '3.7'
+      - type: volume
+        source: source
+        target: /var/www
+        volume: {}
+      - type: volume
+        source: acme
+        target: /root/.acme.sh
+        volume: {}
+      - type: volume
+        source: certs
+        target: /etc/ssl/cadlab
+        volume: {}
+      - type: bind
+        source: ./configs
+        target: /etc/cadlab
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./certificates
+        target: /certificates
+        bind:
+          create_host_path: true
+      - type: bind
+        source: ./logs/nginx
+        target: /var/log/nginx
+        bind:
+          create_host_path: true
+networks:
+  cadlab_net:
 volumes:
-  acme: {}
-  certs: {}
-  data: {}
-  source: {}
-
+  acme:
+  certs:
+  data:
+  mail-configs:
+  source:
+secrets:
+  mysql_root_pass:
+    name: mysql_root_pass
+    external: true
