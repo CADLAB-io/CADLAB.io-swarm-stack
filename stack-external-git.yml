@@ -10,7 +10,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/self-hosted/cadlab:2.0.2
+    image: docker.cadlab.io/self-hosted/cadlab:2.0.3
     logging:
       driver: json-file
       options:
