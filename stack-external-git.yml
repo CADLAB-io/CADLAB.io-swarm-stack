@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 services:
   cadlab:
     deploy:
@@ -10,7 +10,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/self-hosted/cadlab:2.0.3
+    image: docker.cadlab.io/self-hosted/cadlab:2.1.0
     logging:
       driver: json-file
       options:
@@ -83,7 +83,7 @@ services:
     environment:
       MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/self-hosted/mysql:1.0.22
+    image: docker.cadlab.io/self-hosted/mysql:1.0.23
     logging:
       driver: json-file
       options:
@@ -110,7 +110,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/self-hosted/nginx:1.0.18
+    image: docker.cadlab.io/self-hosted/nginx:1.0.19
     logging:
       driver: json-file
       options:
@@ -157,6 +157,7 @@ services:
           create_host_path: true
 networks:
   cadlab_net:
+    name: cadlab_net
 volumes:
   acme:
   certs:
