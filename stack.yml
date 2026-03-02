@@ -12,7 +12,7 @@ services:
         delay: 5s
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/self-hosted/cadlab:2.1.4
+    image: docker.cadlab.io/self-hosted/cadlab:2.1.5
     logging:
       driver: json-file
       options:
@@ -35,23 +35,19 @@ services:
       - type: bind
         source: ./configs
         target: /etc/cadlab
-        bind:
-          create_host_path: true
+        bind: {}
       - type: bind
         source: ./certificates
         target: /certificates
-        bind:
-          create_host_path: true
+        bind: {}
       - type: bind
         source: ./backups
         target: /var/cadlab/backups
-        bind:
-          create_host_path: true
+        bind: {}
       - type: bind
         source: ./logs/cadlab
         target: /var/log/cadlab
-        bind:
-          create_host_path: true
+        bind: {}
       - type: volume
         source: git-configs
         target: /var/git-configs
@@ -70,7 +66,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/git-server:13.3.6-1.9
+    image: docker.cadlab.io/common/git-server:13.3.6-1.9
     logging:
       driver: json-file
       options:
@@ -82,8 +78,7 @@ services:
       - type: bind
         source: ./configs
         target: /etc/cadlab
-        bind:
-          create_host_path: true
+        bind: {}
       - type: volume
         source: certs
         target: /etc/ssl/cadlab
@@ -114,7 +109,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/mail-server:1.0.11
+    image: docker.cadlab.io/common/mail-server:1.0.12
     logging:
       driver: json-file
       options:
@@ -126,8 +121,7 @@ services:
       - type: bind
         source: ./configs
         target: /etc/cadlab
-        bind:
-          create_host_path: true
+        bind: {}
       - type: volume
         source: mail-configs
         target: /etc/cadlab-mail
@@ -160,8 +154,7 @@ services:
       - type: bind
         source: ./logs/mysql
         target: /var/log/mysql
-        bind:
-          create_host_path: true
+        bind: {}
   nginx:
     deploy:
       mode: global
@@ -170,7 +163,7 @@ services:
         delay: 5s
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/self-hosted/nginx:1.0.19
+    image: docker.cadlab.io/self-hosted/nginx:1.0.20
     logging:
       driver: json-file
       options:
@@ -207,18 +200,15 @@ services:
       - type: bind
         source: ./configs
         target: /etc/cadlab
-        bind:
-          create_host_path: true
+        bind: {}
       - type: bind
         source: ./certificates
         target: /certificates
-        bind:
-          create_host_path: true
+        bind: {}
       - type: bind
         source: ./logs/nginx
         target: /var/log/nginx
-        bind:
-          create_host_path: true
+        bind: {}
 networks:
   cadlab_net:
     name: cadlab_net
