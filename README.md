@@ -55,8 +55,6 @@ For support inquiries, please visit https://cadlab.io/contact-us or email us at 
       - [BitBucket Data Center](#bitbucket-data-center)
   - [Links](#links)
 
-
-
 ## About CADLAB.io
 
 [CADLAB.io](https://cadlab.io) is a git-based visual version control platform for collaborative PCB design. What makes CADLAB different from platforms like GitHub, GitLab, BitBucket, and other software-oriented platforms is that CADLAB is hardware-focused. It supports popular PCB design vendors like Altium, Autodesk Eagle, and KiCad. CADLAB works with native design files and renders schematics and PCB layouts right in a browser - no need to export, import, or install anything. Commit your design files to a repository, and you're ready. One of the most powerful CADLAB features is interactive visual diff for schematics and PCBs. You can compare any two revisions of your design and see what exactly was changed from one version to another. Together with the annotation feature, it enables hardware engineers to build a truly collaborative design process. Quality control and peer-review of design haven't been easier. You can find more information on our website https://cadlab.io.
@@ -72,12 +70,14 @@ If you're interested in running a self-hosted CADLAB instance, please contact ou
 You can run CADLAB on a VPS or dedicated server. Below are recommended system requirements for a stand-alone installation of CADLAB and integration with GitLab.
 
 **Stand-alone CADLAB installation:**
+
 - 4+ CPU cores
 - 8+ GB of RAM
 - 40+ GB of storage
 - Ubuntu/Debian/CentOS/Fedora operating system
 
 **CADLAB integrated with a self-hosted GitLab:**
+
 - 2-4+ CPU cores
 - 4+ GB of RAM
 - 20+ GB of storage
@@ -89,13 +89,13 @@ You can run CADLAB on a VPS or dedicated server. Below are recommended system re
 
 Install the latest release of Docker following the official [instructions](https://docs.docker.com/engine/install/#server).
 
-Run the following command to make sure Docker was installed correctly:  
+Run the following command to make sure Docker was installed correctly:
 
 ```bash
 docker version
 ```
 
-The output of this command should be somewhat like this:  
+The output of this command should be somewhat like this:
 
 ![docker version](documentation/images/docker-version.png "Docker version")
 
@@ -123,9 +123,10 @@ Include /etc/ssh/sshd_config.d/*.conf
 #ListenAddress ::
 ```
 
-Uncomment the line `#Port 22` by removing the pound sign `#` and change `22` to `2222`. 
+Uncomment the line `#Port 22` by removing the pound sign `#` and change `22` to `2222`.
 
 ### SELinux Policies
+
 If you're using SELinux, it might be blocking SSHD from using non-standard ports. You can check this by running the command `semanage port -l | grep ssh`. If port `2222` is not listed, you can add it with the command `semanage port -a -t ssh_port_t -p tcp 2222`.
 
 Now restart your sshd service by executing the following command:
@@ -164,7 +165,7 @@ If you install CADLAB as a stand-alone application, you also need to create an A
 git.cadlab.company.com
 ```
 
-Additionally, add or modify an SPF record and include the IP address of your CADLAB server. This step is needed for CADLAB to send emails. If you want CADLAB to send emails through your existing mail server, you can skip this step and specify a custom mail server in the cadlab.json file. 
+Additionally, add or modify an SPF record and include the IP address of your CADLAB server. This step is needed for CADLAB to send emails. If you want CADLAB to send emails through your existing mail server, you can skip this step and specify a custom mail server in the cadlab.json file.
 
 Adding an SPF record depends on your domain registrar and is usually well-documented. But it all comes down to adding a TXT record with a value of the following format:
 
@@ -172,7 +173,7 @@ Adding an SPF record depends on your domain registrar and is usually well-docume
 v=spf1 ip4:50.201.69.200 -all
 ```
 
-**Important:** Keep in mind to replace *50.201.69.200* with your IP address. If your domain already has an SPF record, you should only include the 'ip4:50.201.69.200' part to add your new server.
+**Important:** Keep in mind to replace _50.201.69.200_ with your IP address. If your domain already has an SPF record, you should only include the 'ip4:50.201.69.200' part to add your new server.
 
 DMARC and DKIM
 
@@ -204,7 +205,7 @@ The CADLAB application should be launched in a Docker swarm for better stability
 docker swarm init
 ```
 
-After running this command, you will see a message with a command you can use to add nodes to your swarm. Currently, CADLAB.io is supposed to be run on a single node, so you can ignore swarm join tokens. 
+After running this command, you will see a message with a command you can use to add nodes to your swarm. Currently, CADLAB.io is supposed to be run on a single node, so you can ignore swarm join tokens.
 
 ### Create secrets
 
@@ -219,7 +220,7 @@ vi mysql_password.txt
 
 Then press `i` to enter the editing mode and type your password. To save the file, press `Esc`, type `:wq`, and press `enter`.
 
-Now we can create our Docker secret and delete the file with the password: 
+Now we can create our Docker secret and delete the file with the password:
 
 ```bash
 docker secret create mysql_root_pass mysql_password.txt
@@ -259,6 +260,7 @@ In order to configure CADLAB, you need to edit the cadlab.json file, located in 
 To further configure CADLAB, you can add additional settings to the file. Below is the full list of settings you can specify.
 
 #### hostname
+
 A fully qualified domain name that you plan to use to access CADLAB.
 
 ```javascript
@@ -268,7 +270,8 @@ A fully qualified domain name that you plan to use to access CADLAB.
 ```
 
 #### backups
-This setting controls CADLAB backups. 
+
+This setting controls CADLAB backups.
 
 ```javascript
 {
@@ -282,6 +285,7 @@ This setting controls CADLAB backups.
 ```
 
 Below is the list of all object properties with available values:
+
 - **enabled** - Determines whether automatic backups are enabled. Default: false.
 - **schedule** - Defines the backup schedule. Possible values: `daily`, `weekly`, `monthly`, `custom`.
 - **schedule_cron** - Required if schedule is set to `custom`. Specifies the schedule using the standard [cron format](https://en.wikipedia.org/wiki/Cron).
@@ -291,6 +295,7 @@ By default backups are not enabled, set the `enabled` property to `true` to enab
 Backups are stored in the `/var/cadlab/backups` directory located in the swarm project. CADLAB will automatically rotate backups and keep 10 most recent backups.
 
 #### ssl_tls_support
+
 This setting controls if your CADLAB instance will be available over HTTP or HTTPS. If this setting is not added, then HTTPS is disabled by default. `ssl_tls_support` is an object of the following structure:
 
 ```javascript
@@ -305,6 +310,7 @@ This setting controls if your CADLAB instance will be available over HTTP or HTT
 ```
 
 Below is the list of all object properties with available values:
+
 - **enabled** - `true` or `false` enables/disables HTTPS. **Important:** if CADLAB is behind a [reverse proxy](#reverse_proxy), you may leave HTTPS disabled and handle HTTPS connection in your reverse proxy. If you want to keep HTTPS communication between your reverse proxy and CADLAB, you must use an `external` SSL certificate that your host machine with reverse proxy trusts. You may also choose `self-signed`, but this will require adding a custom Certificate Authority (CA) generated by CADLAB to your host with reverse proxy.
 - **vendor** - specifies what certificates to use. Possible values are:
   - `letsencrypt` - CADLAB will automatically generate free Let's Encrypt certificates. **IMPORTANT**: Let's Encrypt needs to be able to access your CADLAB installation to validate the certificates. If the server you install CADLAB on is not reachable from the internet, you need to choose the `external` or `self-signed option.
@@ -314,6 +320,7 @@ Below is the list of all object properties with available values:
 - **custom_ca_pem** - custom Certificate Authority (CA) cert file in pem format. You should specify this property if you want CADLAB to generate `self-signed` keys using your own Certificate Authority. In this case you should also specify `custom_ca_key`. The value of this property should be the filename of a custom CA certificate placed in the `certificates` directory. You should also specify this property if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
 
 #### mail
+
 By default, CADLAB uses a built-in send-only mail server. For this mail server to deliver emails successfully, you need to add an SPF and optionally DMARC, and DKIM records as described in the [Add DNS records](#add-dns-records) section. If you prefer using your own mail server, you can provide SMTP connection info in this section. `mail` is an object of the following structure:
 
 ```javascript
@@ -337,6 +344,7 @@ By default, CADLAB uses a built-in send-only mail server. For this mail server t
 ```
 
 Below is the list of all object properties with available values:
+
 - **enabled** - specifies whether emails should be sent. Default: true.
 - **smtp.host** - hostname of your mail server.
 - **smtp.port** - SMTP port. It depends on your mail server setup, but usually, 587 if an encrypted protocol is used, or 25 as the default SMTP port.
@@ -352,29 +360,56 @@ Below is the list of all object properties with available values:
 **Note:** Use the command line utility to [get the DKIM record configs](#getting-the-dkim-configuration).
 
 #### reverse_proxy
-CADLAB is deployed with its own Nginx container to handle incoming traffic for ports `80`, `443`, and, optionally, `22`. If you install CADLAB on a server with other software running on the same ports, you may want to use a reverse proxy to handle connections. This will require modifying `stack.yml` or `stack-external-git.yml` file, depending on whether you deploy CADLAB with git or connect it to GitLab.
 
-To do so, you need to change port bindings in the Nginx service section to some other ports you want to use for CADLAB on your server. For example, `8080` instead of `80`, and `8443` instead of `433` like below:
+CADLAB is deployed with its own Nginx container to handle incoming traffic on ports `80`, `443`, and, for stand-alone deployments with the bundled git server, `22`. If other software on the host already uses those ports, you can put CADLAB behind another reverse proxy and publish Nginx on different host ports.
+
+**Prefer an override file instead of editing the stack compose file.** Keep `stack.yml` or `stack-external-git.yml` unchanged so you can `git pull` updates from this repository without merge conflicts. Create a second Compose file (for example `stack-reverse-proxy.override.yml`) next to the base file and pass **both** files to `docker stack deploy` (see [Start CADLAB swarm](#start-cadlab-swarm)).
+
+Docker Compose merges multiple files by [appending](https://docs.docker.com/reference/compose-file/merge/) list fields such as `ports`, which would duplicate mappings. To **replace** the Nginx `ports` list entirely, use the `!override` tag (supported in Docker Compose **v2.24+**). The example below maps container ports `80` / `443` / `22` to host `8080` / `8443` / `22`; adjust `published` values to match what your front proxy will connect to.
+
+Stand-alone stack (`stack.yml`) — Nginx publishes HTTP, HTTPS, and SSH for git:
 
 ```yaml
-ports:
-    - mode: host
-      target: 22
-      published: 22
-      protocol: tcp
-    - mode: host
-      target: 80
-      published: 8080
-      protocol: tcp
-    - mode: host
-      target: 443
-      published: 8443
-      protocol: tcp
+version: "3.7"
+services:
+  nginx:
+    ports: !override
+      - mode: host
+        target: 22
+        published: 22
+        protocol: tcp
+      - mode: host
+        target: 80
+        published: 8080
+        protocol: tcp
+      - mode: host
+        target: 443
+        published: 8443
+        protocol: tcp
 ```
 
-Then in your reverse proxy, redirect requests to the domain specified in `hostname` setting to the ports you specified in the stack file. In most cases, you would disable [ssl_tls_support](#ssl_tls_support) in CADLAB and proxy requests to port `80`, leaving  HTTPS handling for your reverse proxy. You may choose to use HTTPS connection for communication between your proxy and CADLAB for more information on this [read here](#ssl_tls_support).
+External git (`stack-external-git.yml`) — the Nginx service does not expose SSH; use the same pattern with only HTTP and HTTPS:
 
-In addition to configuring your proxy and changing the stack file, you also need to tell CADLAB it's behind a proxy. To do that, you need to add the following section to `cadlab.json` file:
+```yaml
+version: "3.7"
+services:
+  nginx:
+    ports: !override
+      - mode: host
+        target: 80
+        published: 8080
+        protocol: tcp
+      - mode: host
+        target: 443
+        published: 8443
+        protocol: tcp
+```
+
+If you cannot use `!override`, either upgrade Docker Compose or edit the published ports directly in the base stack file (same YAML as inside `ports:`, without `!override`).
+
+Point your external reverse proxy at the host ports you chose. In most cases you should disable [ssl_tls_support](#ssl_tls_support) in CADLAB and terminate TLS on the proxy, forwarding to Nginx on the published HTTP port (for example `8080` above). You can instead use HTTPS between the proxy and CADLAB; see [ssl_tls_support](#ssl_tls_support).
+
+You must also tell CADLAB it sits behind a proxy by adding this to `cadlab.json`:
 
 ```javascript
 {
@@ -388,6 +423,7 @@ In addition to configuring your proxy and changing the stack file, you also need
 ```
 
 Below is the list of all object properties with available values:
+
 - **enabled** - `true` or `false` - tells CADLAB if it's behind a reverse proxy.
 - **protocol** - `http` or `https` - tells CADLAB which protocol is used to access CADLAB in the reverse proxy so that CADLAB can build correct links to pages and resource files like CSS and JS.
 
@@ -409,13 +445,14 @@ Possible values: a number followed by `M` (megabytes) or `G` (gigabytes)."
 
 ### Add license file
 
-Put your `license.key` file into the `/var/cadlab/configs` directory of the swarm project. Do not modify or re-save the license file, as it will fail validation, and the license key will not be valid. 
+Put your `license.key` file into the `/var/cadlab/configs` directory of the swarm project. Do not modify or re-save the license file, as it will fail validation, and the license key will not be valid.
 
 You can copy the license file from your local machine to the server in multiple ways. For example, if you're on Mac or Linux, you can use the `scp` [command](http://www.hypexr.org/linux_scp_help.php) like so:
 
 ```
 scp -P 2222 license.key YOUR_USER@YOUR_IP:/var/cadlab/configs
 ```
+
 `-P` stands for the port. You will need to use this if you install CADLAB as a stand-alone application since CADLAB uses standard SSH port `22` to work with your git container. If you use an external git back-end like GitLab, you can omit this option.
 
 On Windows you can use [PuTTY](https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html) or SFTP client like [FileZilla](https://filezilla-project.org/)
@@ -430,15 +467,26 @@ To install a stand-alone version of CADLAB, you need to execute the following co
 docker stack deploy --with-registry-auth -c stack.yml cadlab
 ```
 
-To install CADLAB with an external git back-end, like GitLab, use this command: 
+To install CADLAB with an external git back-end, like GitLab, use this command:
 
 ```bash
 docker stack deploy --with-registry-auth -c stack-external-git.yml cadlab
 ```
 
-Starting CADLAB for the first time will take quite some time, as Docker needs to download all the required images and perform the initial installation. 
+If you use a [reverse proxy](#reverse_proxy) and keep your port changes in a separate override file (for example `stack-reverse-proxy.override.yml`), list the base stack file first, then the override:
+
+```bash
+docker stack deploy --with-registry-auth -c stack.yml -c stack-reverse-proxy.override.yml cadlab
+```
+
+```bash
+docker stack deploy --with-registry-auth -c stack-external-git.yml -c stack-reverse-proxy.override.yml cadlab
+```
+
+Starting CADLAB for the first time will take quite some time, as Docker needs to download all the required images and perform the initial installation.
 
 The stand-alone version of CADLAB is currently running 5 services:
+
 - cadlab
 - git-server
 - mail-server
@@ -476,6 +524,7 @@ The healthy application state is when all services are running with `1/1` in the
 ## Troubleshooting
 
 ### Checking container health
+
 If not all of your services are running properly, you will see that in the output of the `docker stack ps cadlab` command or `docker service ls` command. Usually, a service won't start because of an incorrect `cadlab.json` file. For example, if you made a mistake in the `backups` setting, the output of the `ps` command would look like this:
 
 ![docker stack ps cadlab - failed service](documentation/images/docker-stack-ps-failed.png "Docker stack ps command output")
@@ -505,7 +554,8 @@ After fixing the mistake in the cadlab.json file, you need to restart your faile
 ```bash
 docker service rm cadlab_cadlab
 ```
-- where `cadlab_cadlab` is the name of the service. 
+
+- where `cadlab_cadlab` is the name of the service.
 
 If you have more than one failed service, you can delete all of them individually or delete the whole stack like this:
 
@@ -518,6 +568,7 @@ After you have fixed the cadlab.json file and removed all failed services, you n
 If any container doesn't start, you need to repeat the troubleshooting steps.
 
 ### 502 bad gateway
+
 Sometimes, you can get a 502 bad gateway error when trying to access the website even though all docker services are running without errors. It usually happens when you try to access the website while CADLAB is still being installed. In this case, wait a minute or two and try refreshing your browser.
 
 ## Changing CADLAB configurations
@@ -529,6 +580,7 @@ After you have modified your `cadlab.json` file, execute the following command:
 ```bash
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab reconfigure
 ```
+
 **Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. But you don't need to type it manually. When you write the `exec` command, just type `docker exec -it cadlab_cadlab` and press `tab`. This will autocomplete the container name. After that, type the `cadlab` utility and CADLAB command to execute, in this case, `reconfigure`.
 
 If autocomplete didn't work on your machine, you could use an alternative way to execute this command. First, list all containers by running the following command:
@@ -553,17 +605,18 @@ When a new release of CADLAB is available, you need to pull changes from this re
 
 Then, perform the same `docker stack deploy` command we've already covered in the [Start CADLAB swarm](#start-cadlab-swarm) section.
 
-
 ## Backup & restore CADLAB
 
 ### Backing up CADLAB
+
 When you configure CADLAB, you can set the `backups` option in the `cadlab.json` file to make CADLAB perform backups on a regular basis. Read about this setting [here](#backups). CADLAB database, files, and git data (for stand-alone installation) will be automatically backed up and stored in the `/var/cadlab/backups` directory. CADLAB will store 10 of the most recent backup files. Backups are named using the following format `[current_timestamp]-yyyy-mm-dd_cadlab.tar.gz`.
 
-You can also perform backups manually using the CADLAB command-line utility. In order to do this, we need to execute a command in the `cadlab` container. 
+You can also perform backups manually using the CADLAB command-line utility. In order to do this, we need to execute a command in the `cadlab` container.
 
 ```bash
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab backup
 ```
+
 **Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. See the [Changing CADLAB configurations](#changing-cadlab-configurations) section for guidance on how to find out what your unique container name is.
 
 Depending on your backup strategy, you can then copy backups to Amazon S3 or another server in your network.
@@ -575,6 +628,7 @@ When you need to restore CADLAB data from a backup, you can do that using the CA
 ```bash
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab restore
 ```
+
 **Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. See the [Changing CADLAB configurations](#changing-cadlab-configurations) section for guidance on how to find out what your unique container name is.
 
 The command-line utility will tell you what backup it is going to restore and ask for your confirmation.
@@ -592,6 +646,7 @@ CADLAB offers a command-line utility to help you manage your CADLAB installation
 ```bash
 docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc cadlab
 ```
+
 **Note**: `cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ksc` part is a dynamically generated container name in a Docker swarm. See the [Changing CADLAB configurations](#changing-cadlab-configurations) section for guidance on how to find out what is your unique container name.
 
 To execute one of the commands, for example, `reconfigure`, run the following Docker command:
@@ -601,6 +656,7 @@ docker exec -it cadlab_cadlab.w1ju1zaqlrpg5rbiqr9engr9n.0foep2va9ua1adzori4kj2ks
 ```
 
 ### Getting the DKIM configuration
+
 If DKIM is enabled in the [mail settings](#mail), you can get the DKIM configuration record using the following command:
 
 ```bash
@@ -615,9 +671,11 @@ mail._domainkey	IN	TXT	( "v=DKIM1; k=rsa; "
 ```
 
 To create a DKIM DNS record, use the domain key as the record name:
+
 ```bash
 mail._domainkey
 ```
+
 Use the key - the part after `p=` as the record value:
 
 ```bash
@@ -707,10 +765,9 @@ Alternatively, you can integrate CADLAB at the **group level**, which **does not
 
 If you selected **"GitLab Cloud (gitlab.com)"**, you should create an application at the **group level**, following the steps in the [Group-Level Application](#group-level-application) section.
 
-
 ### GitHub Integration
 
-The setup process for both **GitHub Enterprise** and **GitHub Cloud** is the same. After completing the first step, the integration settings form will appear, as shown in the screenshot below.  
+The setup process for both **GitHub Enterprise** and **GitHub Cloud** is the same. After completing the first step, the integration settings form will appear, as shown in the screenshot below.
 
 - **Copy the Callback URL** from the form and proceed to create a GitHub application.
 
@@ -827,7 +884,7 @@ To integrate CADLAB with either **BitBucket Cloud (bitbucket.org)** or a **self-
 
    ![BitBucket consumer secret](/documentation/images/bitbucket-consumer-key-secret.png "BitBucket consumer secret")
 
-6. Complete the integration in CADLAB. You will be prompted to **log in with your BitBucket account**.  
+6. Complete the integration in CADLAB. You will be prompted to **log in with your BitBucket account**.
    - The first user to sign in will be **automatically assigned the Admin role**.
 
 ---
@@ -865,7 +922,7 @@ CADLAB integrates with BitBucket Data Center using OAuth. This requires creating
 
      ![BitBucket Data Center app credentials](/documentation/images/bitbucket-dc-app-secret.png "BitBucket Data Center app credentials")
 
-5. Complete the integration in CADLAB. You will be prompted to **log in with your BitBucket account**.  
+5. Complete the integration in CADLAB. You will be prompted to **log in with your BitBucket account**.
    - The first user to sign in will be **automatically assigned the Admin role**.
 
 ## Links
