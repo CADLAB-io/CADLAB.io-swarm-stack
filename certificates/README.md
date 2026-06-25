@@ -1,1 +1,3 @@
 Use this folder to upload custom SSL/TLS certificates to CADLAB. See [SSL configs](/README.md#ssl_tls_support) for more info.
+
+You can also place a signing authority CA certificate here when a self-hosted GitLab, GitHub Enterprise, or BitBucket Data Center uses a self-signed certificate. Set `custom_ca_pem` in `cadlab.json` to the filename of that certificate. See [Self-signed certificates on external Git providers](/README.md#self-signed-certificates-on-external-git-providers) for details.

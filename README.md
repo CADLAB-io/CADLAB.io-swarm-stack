@@ -35,6 +35,7 @@ For support inquiries, please visit https://cadlab.io/contact-us or email us at 
   - [Troubleshooting](#troubleshooting)
     - [Checking container health](#checking-container-health)
     - [502 bad gateway](#502-bad-gateway)
+    - [Invalid SSL certificate when connecting to Git provider](#invalid-ssl-certificate-when-connecting-to-git-provider)
   - [Changing CADLAB configurations](#changing-cadlab-configurations)
   - [Updating CADLAB](#updating-cadlab)
   - [Backup \& restore CADLAB](#backup--restore-cadlab)
@@ -43,6 +44,7 @@ For support inquiries, please visit https://cadlab.io/contact-us or email us at 
   - [CADLAB command-line utility](#cadlab-command-line-utility)
     - [Getting the DKIM configuration](#getting-the-dkim-configuration)
   - [Integrating CADLAB with external Git provider](#integrating-cadlab-with-external-git-provider)
+    - [Self-signed certificates on external Git providers](#self-signed-certificates-on-external-git-providers)
     - [GitLab Integration](#gitlab-integration)
       - [Self-hosted GitLab](#self-hosted-gitlab)
         - [System-Level Application (Requires Admin Access)](#system-level-application-requires-admin-access)
@@ -317,7 +319,7 @@ Below is the list of all object properties with available values:
   - `self-signed` - CADLAB will generate a custom Certificate Authority (CA) and TLS certificates for your domain. The Certificate Authority certificate will be placed in the `certificates` directory of the swarm project. In order for your users to access the website, they will need to add the generated CA to their computers. The instructions on adding a custom CA depend on an operating system and are well covered on the internet.
   - `external` - specifies that external certificates will be used for CADLAB. If this option is selected, you need to place certificates in the pem format and corresponding keys in the `certificates` directory of the swarm project. If you install CADLAB as a stand-alone application, you need to provide two pairs of certificate/keys for the hostname you specified in the `hostname` setting and `git.[hostname]`. For example, `cadlab.example.com.pem` / `cadlab.example.com.key` and `git.cadlab.example.com.pem` / `git.cadlab.example.com.key`.
 - **custom_ca_key** - custom Certificate Authority (CA) key. You should specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority. In this case you also need to specify `custom_ca_pem`. The value of this property should be the filename of a custom CA placed in the `certificates` directory.
-- **custom_ca_pem** - custom Certificate Authority (CA) cert file in pem format. You should specify this property if you want CADLAB to generate `self-signed` keys using your own Certificate Authority. In this case you should also specify `custom_ca_key`. The value of this property should be the filename of a custom CA certificate placed in the `certificates` directory. You should also specify this property if you've chosen `external` in the vendor property and your certificates are signed with a custom CA.
+- **custom_ca_pem** - custom Certificate Authority (CA) cert file in PEM format. The value should be the filename of a CA certificate placed in the `certificates` directory. When `vendor` is `self-signed`, specify this property (together with `custom_ca_key`) if you want CADLAB to generate TLS certificates using your own Certificate Authority; otherwise CADLAB creates its own CA. Also use this property when `vendor` is `external` and your CADLAB certificates are signed by a custom CA, or when a self-hosted GitLab, GitHub Enterprise, or BitBucket Data Center that CADLAB connects to uses a self-signed certificate. For the last case, see [Self-signed certificates on external Git providers](#self-signed-certificates-on-external-git-providers).
 
 #### mail
 
@@ -571,6 +573,13 @@ If any container doesn't start, you need to repeat the troubleshooting steps.
 
 Sometimes, you can get a 502 bad gateway error when trying to access the website even though all docker services are running without errors. It usually happens when you try to access the website while CADLAB is still being installed. In this case, wait a minute or two and try refreshing your browser.
 
+### Invalid SSL certificate when connecting to Git provider
+
+If you see the error **"The URL you entered doesn't seem to point to any server or there is no valid ssl certificate installed."** when setting up an integration with an external Git provider, it usually means one of the following:
+
+1. **Typo in the URL** — Verify the hostname is correct, the scheme is `https://`, and there are no extra slashes or misspellings.
+2. **Self-signed certificate** — Your self-hosted GitLab, GitHub Enterprise, or BitBucket Data Center may be using a certificate signed by a private CA that CADLAB does not trust by default. Place the signing authority's CA certificate in the `certificates` directory and set `custom_ca_pem` in `cadlab.json` as described in [Self-signed certificates on external Git providers](#self-signed-certificates-on-external-git-providers).
+
 ## Changing CADLAB configurations
 
 Sometimes, you may need to change the CADLAB configuration after the app was successfully deployed. In order to do this, you need to modify the `cadlab.json` file and execute a reconfigure command for CADLAB.
@@ -694,6 +703,27 @@ Open the URL you specified in the `hostname` [here](#hostname) in your browser, 
 ![CADLAB.io Welcome screen](documentation/images/cadlab-welcome-screen.png "CADLAB Welcome screen")
 
 Next, choose your Git Provider, and enter the URL of your Git provider in the URL field. **Please note**: if your Git provider is deployed to a private network, CADLAB also needs to be deployed to the same network so that it's able to connect to the Git API.
+
+### Self-signed certificates on external Git providers
+
+If your self-hosted **GitLab**, **GitHub Enterprise**, or **BitBucket Data Center** uses a self-signed certificate (or a certificate signed by a private Certificate Authority), CADLAB will not trust it by default and cannot connect to the Git API over HTTPS. To make CADLAB trust your Git provider:
+
+1. Copy the **signing authority CA certificate** (PEM format) into the `certificates` directory of the swarm project (for example, `/var/cadlab/certificates`).
+2. Add the **`custom_ca_pem`** property to `cadlab.json` under `ssl_tls_support`, set to the filename of the CA certificate you placed in that directory.
+3. If CADLAB is already running, [reconfigure](#changing-cadlab-configurations) the application or redeploy the stack so the change takes effect.
+
+Example:
+
+```javascript
+{
+    "hostname": "cadlab.example.com",
+    "ssl_tls_support": {
+        "custom_ca_pem": "git-provider-ca.pem"
+    }
+}
+```
+
+If you see an SSL-related error during integration setup, see [Invalid SSL certificate when connecting to Git provider](#invalid-ssl-certificate-when-connecting-to-git-provider).
 
 ### GitLab Integration
 
