@@ -10,7 +10,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/self-hosted/cadlab:2.1.8
+    image: docker.cadlab.io/self-hosted/cadlab:2.1.9
     logging:
       driver: json-file
       options:
@@ -104,7 +104,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/self-hosted/nginx:1.0.20
+    image: docker.cadlab.io/self-hosted/nginx:1.0.21
     logging:
       driver: json-file
       options:
