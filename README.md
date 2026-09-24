@@ -55,6 +55,8 @@ For support inquiries, please visit https://cadlab.io/contact-us or email us at 
     - [BitBucket Integration](#bitbucket-integration)
       - [BitBucket Cloud (bitbucket.org)](#bitbucket-cloud-bitbucketorg)
       - [BitBucket Data Center](#bitbucket-data-center)
+    - [Gitea Integration](#gitea-integration)
+      - [Self-hosted Gitea](#self-hosted-gitea)
   - [Links](#links)
 
 ## About CADLAB.io
@@ -319,7 +321,7 @@ Below is the list of all object properties with available values:
   - `self-signed` - CADLAB will generate a custom Certificate Authority (CA) and TLS certificates for your domain. The Certificate Authority certificate will be placed in the `certificates` directory of the swarm project. In order for your users to access the website, they will need to add the generated CA to their computers. The instructions on adding a custom CA depend on an operating system and are well covered on the internet.
   - `external` - specifies that external certificates will be used for CADLAB. If this option is selected, you need to place certificates in the pem format and corresponding keys in the `certificates` directory of the swarm project. If you install CADLAB as a stand-alone application, you need to provide two pairs of certificate/keys for the hostname you specified in the `hostname` setting and `git.[hostname]`. For example, `cadlab.example.com.pem` / `cadlab.example.com.key` and `git.cadlab.example.com.pem` / `git.cadlab.example.com.key`.
 - **custom_ca_key** - custom Certificate Authority (CA) key. You should specify this property if you want CADLAB to generate self-signed keys using your own Certificate Authority. In this case you also need to specify `custom_ca_pem`. The value of this property should be the filename of a custom CA placed in the `certificates` directory.
-- **custom_ca_pem** - custom Certificate Authority (CA) cert file in PEM format. The value should be the filename of a CA certificate placed in the `certificates` directory. When `vendor` is `self-signed`, specify this property (together with `custom_ca_key`) if you want CADLAB to generate TLS certificates using your own Certificate Authority; otherwise CADLAB creates its own CA. Also use this property when `vendor` is `external` and your CADLAB certificates are signed by a custom CA, or when a self-hosted GitLab, GitHub Enterprise, or BitBucket Data Center that CADLAB connects to uses a self-signed certificate. For the last case, see [Self-signed certificates on external Git providers](#self-signed-certificates-on-external-git-providers).
+- **custom_ca_pem** - custom Certificate Authority (CA) cert file in PEM format. The value should be the filename of a CA certificate placed in the `certificates` directory. When `vendor` is `self-signed`, specify this property (together with `custom_ca_key`) if you want CADLAB to generate TLS certificates using your own Certificate Authority; otherwise CADLAB creates its own CA. Also use this property when `vendor` is `external` and your CADLAB certificates are signed by a custom CA, or when a self-hosted GitLab, GitHub Enterprise, BitBucket Data Center, or Gitea that CADLAB connects to uses a self-signed certificate. For the last case, see [Self-signed certificates on external Git providers](#self-signed-certificates-on-external-git-providers).
 
 #### mail
 
@@ -578,7 +580,7 @@ Sometimes, you can get a 502 bad gateway error when trying to access the website
 If you see the error **"The URL you entered doesn't seem to point to any server or there is no valid ssl certificate installed."** when setting up an integration with an external Git provider, it usually means one of the following:
 
 1. **Typo in the URL** — Verify the hostname is correct, the scheme is `https://`, and there are no extra slashes or misspellings.
-2. **Self-signed certificate** — Your self-hosted GitLab, GitHub Enterprise, or BitBucket Data Center may be using a certificate signed by a private CA that CADLAB does not trust by default. Place the signing authority's CA certificate in the `certificates` directory and set `custom_ca_pem` in `cadlab.json` as described in [Self-signed certificates on external Git providers](#self-signed-certificates-on-external-git-providers).
+2. **Self-signed certificate** — Your self-hosted GitLab, GitHub Enterprise, BitBucket Data Center, or Gitea may be using a certificate signed by a private CA that CADLAB does not trust by default. Place the signing authority's CA certificate in the `certificates` directory and set `custom_ca_pem` in `cadlab.json` as described in [Self-signed certificates on external Git providers](#self-signed-certificates-on-external-git-providers).
 
 ## Changing CADLAB configurations
 
@@ -696,7 +698,7 @@ Example using GoDaddy DNS manager:
 
 ## Integrating CADLAB with external Git provider
 
-If you choose to install CADLAB with an external git back-end, for example, GitLab, GitHub, or BitBucket, you need to use the `stack-external-git.yml` file to [start the swarm](#start-cadlab-swarm). After the CADLAB application successfully starts, you need to integrate it with your Git provider.
+If you choose to install CADLAB with an external git back-end, for example, GitLab, GitHub, BitBucket, or Gitea, you need to use the `stack-external-git.yml` file to [start the swarm](#start-cadlab-swarm). After the CADLAB application successfully starts, you need to integrate it with your Git provider.
 
 Open the URL you specified in the `hostname` [here](#hostname) in your browser, and you should see a CADLAB welcome screen:
 
@@ -706,7 +708,7 @@ Next, choose your Git Provider, and enter the URL of your Git provider in the UR
 
 ### Self-signed certificates on external Git providers
 
-If your self-hosted **GitLab**, **GitHub Enterprise**, or **BitBucket Data Center** uses a self-signed certificate (or a certificate signed by a private Certificate Authority), CADLAB will not trust it by default and cannot connect to the Git API over HTTPS. To make CADLAB trust your Git provider:
+If your self-hosted **GitLab**, **GitHub Enterprise**, **BitBucket Data Center**, or **Gitea** uses a self-signed certificate (or a certificate signed by a private Certificate Authority), CADLAB will not trust it by default and cannot connect to the Git API over HTTPS. To make CADLAB trust your Git provider:
 
 1. Copy the **signing authority CA certificate** (PEM format) into the `certificates` directory of the swarm project (for example, `/var/cadlab/certificates`).
 2. Add the **`custom_ca_pem`** property to `cadlab.json` under `ssl_tls_support`, set to the filename of the CA certificate you placed in that directory.
@@ -954,6 +956,47 @@ CADLAB integrates with BitBucket Data Center using OAuth. This requires creating
 
 5. Complete the integration in CADLAB. You will be prompted to **log in with your BitBucket account**.
    - The first user to sign in will be **automatically assigned the Admin role**.
+
+### Gitea Integration
+
+If you selected **"Gitea Self-hosted"** in the first step and CADLAB successfully connected to your Gitea, the integration settings form will appear as shown below.
+
+- **Copy the Callback URL** from the form and proceed to create an OAuth2 application in Gitea.
+
+  ![CADLAB Gitea callback URL](documentation/images/gitea-cadlab-callback.png "CADLAB Gitea callback URL")
+
+---
+
+#### Self-hosted Gitea
+
+To connect CADLAB with your **self-hosted Gitea**, you need to create an OAuth2 application in Gitea. This requires **admin permissions**.
+
+1. **Navigate to Site Administration**:
+   - Open the user menu and select **"Site Administration"**.
+
+     ![Gitea Site Administration](documentation/images/gitea-site-administration.png "Gitea Site Administration")
+
+2. **Create the Application**:
+   - In the left-hand navigation, open **Integrations** and select **"Applications"**.
+   - **Application Name**: Enter a name (e.g., **"CADLAB.io"**).
+   - **Redirect URIs**: Paste the **CADLAB Callback URL**.
+   - Keep **Confidential Client** selected.
+   - Click **"Create Application"**.
+
+     ![Gitea Application](documentation/images/gitea-application.png "Gitea Application")
+
+3. **Copy the Application Credentials**:
+   - Gitea will generate a **Client ID** and **Client Secret**.
+
+     ![Gitea Client ID and Secret](documentation/images/gitea-client-id-secret.png "Gitea Client ID and Secret")
+
+4. **Enter Credentials in CADLAB**:
+   - Copy the **Client ID** into **Application ID** and the **Client Secret** into **Secret Key** in the CADLAB integration form.
+   - Click **"FINISH"**.
+
+5. **Complete the Setup**:
+   - You will be redirected to the **Gitea sign-in** screen.
+   - The **first user** that signs in during the initial setup will be **automatically assigned an Admin role**.
 
 ## Links
 

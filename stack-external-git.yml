@@ -10,7 +10,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/self-hosted/cadlab:2.1.9
+    image: docker.cadlab.io/self-hosted/cadlab:2.2.0
     logging:
       driver: json-file
       options:
@@ -23,8 +23,12 @@ services:
         target: /run/secrets/mysql_root_pass
     volumes:
       - type: volume
+        source: files
+        target: /var/www/sites/default/files
+        volume: {}
+      - type: volume
         source: source
-        target: /var/www
+        target: /var/old_source
         volume: {}
       - type: volume
         source: certs
@@ -104,7 +108,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/self-hosted/nginx:1.0.21
+    image: docker.cadlab.io/self-hosted/nginx:1.0.22
     logging:
       driver: json-file
       options:
@@ -122,10 +126,6 @@ services:
         published: 443
         protocol: tcp
     volumes:
-      - type: volume
-        source: source
-        target: /var/www
-        volume: {}
       - type: volume
         source: acme
         target: /root/.acme.sh
@@ -149,10 +149,14 @@ services:
 networks:
   cadlab_net:
     name: cadlab_net
+    ipam:
+      config:
+        - subnet: 10.20.0.0/24
 volumes:
   acme:
   certs:
   data:
+  files:
   mail-configs:
   source:
 secrets:
