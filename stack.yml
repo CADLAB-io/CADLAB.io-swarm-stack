@@ -12,7 +12,7 @@ services:
         delay: 5s
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/self-hosted/cadlab:2.2.1
+    image: docker.cadlab.io/self-hosted/cadlab:2.2.2
     logging:
       driver: json-file
       options:
@@ -70,7 +70,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/common/git-server:13.3.6-1.9
+    image: docker.cadlab.io/common/git-server:13.3.6-1.10
     logging:
       driver: json-file
       options:
@@ -113,7 +113,7 @@ services:
       restart_policy:
         condition: any
         delay: 5s
-    image: docker.cadlab.io/common/mail-server:1.0.12
+    image: docker.cadlab.io/common/mail-server:1.0.13
     logging:
       driver: json-file
       options:
@@ -137,9 +137,8 @@ services:
         condition: any
         delay: 5s
     environment:
-      MYSQL_DATABASE: cadlab
       MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_pass
-    image: docker.cadlab.io/self-hosted/mysql:1.0.23
+    image: docker.cadlab.io/self-hosted/mysql:1.0.24
     logging:
       driver: json-file
       options:
@@ -156,6 +155,11 @@ services:
         target: /var/lib/mysql
         volume: {}
       - type: bind
+        source: ./configs
+        target: /etc/cadlab
+        read_only: true
+        bind: {}
+      - type: bind
         source: ./logs/mysql
         target: /var/log/mysql
         bind: {}
@@ -167,7 +171,7 @@ services:
         delay: 5s
     environment:
       CADLAB_INCLUDE_GIT: "true"
-    image: docker.cadlab.io/self-hosted/nginx:1.0.22
+    image: docker.cadlab.io/self-hosted/nginx:1.0.24
     logging:
       driver: json-file
       options:
